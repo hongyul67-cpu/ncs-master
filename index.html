@@ -158,6 +158,34 @@
   .btn.ghost{background:var(--card2);color:var(--ink);border:1px solid var(--line2)}
   .btn:active{transform:translateY(1px)}
 
+  /* 타이머 */
+  .clock{font-weight:800;font-size:13px;color:var(--amber);background:#2a2410;
+    border:1px solid #5c4a1a;border-radius:9px;padding:7px 11px;white-space:nowrap}
+  .clock.warn{color:#fff;background:#7c2d12;border-color:#c2410c}
+  .cbtfloat{position:fixed;left:12px;bottom:12px;z-index:45;font-size:15px;
+    box-shadow:0 6px 20px rgba(0,0,0,.45)}
+  .cbtbar{display:flex;justify-content:space-between;align-items:center;
+    background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:10px 14px;margin-top:4px;font-size:13px;color:var(--sub);font-weight:700}
+  .cbtbar b{color:var(--cyan)}
+  /* 모의고사 */
+  .recogrid{display:flex;flex-direction:column;gap:8px}
+  .recobtn{text-align:left;background:var(--card2);border:1px solid var(--line2);color:var(--ink);
+    border-radius:11px;padding:11px 13px;cursor:pointer;font-family:inherit}
+  .recobtn:hover{border-color:var(--cyan)}
+  .recobtn b{color:var(--cyan);font-size:14px}
+  .recobtn span{display:block;color:var(--sub);font-size:12px;margin-top:3px}
+  .chkgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  @media(max-width:520px){.chkgrid{grid-template-columns:1fr}}
+  .chk{display:flex;gap:8px;align-items:center;background:var(--card2);border:1px solid var(--line);
+    border-radius:10px;padding:10px 12px;cursor:pointer;font-size:13.5px;font-weight:700;color:var(--ink)}
+  .chk input{accent-color:var(--cyan);width:16px;height:16px}
+  .chk.on{border-color:var(--cyan);background:#0e2b3a}
+  .mockopt{display:flex;gap:14px;flex-wrap:wrap}
+  .mockopt label{font-size:12.5px;font-weight:700;color:var(--sub);display:flex;flex-direction:column;gap:6px}
+  .mockopt select{padding:9px 11px;border-radius:9px;border:1px solid var(--line2);background:var(--card2);
+    color:var(--ink);font-family:inherit;font-size:14px;font-weight:600}
+
   .start{background:linear-gradient(150deg,#10224b,#0b1630);border:1px solid var(--line2);
     border-radius:18px;padding:20px;text-align:center;margin-top:14px}
   .start .ico{font-size:38px}
@@ -249,13 +277,16 @@
         <span>+ 자원·정보·기술·조직이해 등</span>
       </div>
     </div>
+    <div id="resumeBar"></div>
+    <button class="btn primary" style="margin-top:10px" onclick="goMock()">🎯 모의고사 · 실전 종합 (분야를 골라 시험처럼)</button>
     <h2 class="sec"><span class="n">영역 선택</span> 무엇을 공부할까요?</h2>
     <div class="areas" id="areaCards"></div>
     <div class="card">
       <h3>🎚️ 난이도 · 학년 가이드</h3>
       <p class="muted">우측 위 <b>기초/심화</b> 버튼으로 수준을 바꿉니다. 권장: <b>1학년=기초</b>,
       <b>2·3학년=심화</b>. 각 영역 안에서 <b>전체 풀이</b> 탭을 열면 모든 문항의 정답·해설을 한눈에 보고
-      복습하거나 인쇄할 수 있습니다.</p>
+      복습하거나 인쇄할 수 있습니다. 학습 기록(최고 점수·이어서)은 <b>이 기기에 저장</b>됩니다.</p>
+      <button class="btn ghost" style="margin-top:6px;padding:9px 14px;font-size:13px" onclick="resetProgress()">🗑️ 학습 기록 초기화</button>
     </div>
     <p class="note">선생님이 결과 수집 링크로 열면 게임·점검 결과를 반·번호와 함께 제출할 수 있습니다.</p>
   </section>
@@ -276,6 +307,7 @@
     <div id="playRun" class="hidden">
       <div class="qhud">
         <div id="hud"></div>
+        <span id="gTimer" class="clock">⏱ 0:00</span>
         <button class="btn ghost" style="padding:8px 12px;font-size:12.5px" onclick="quitGame()">← 종료</button>
       </div>
       <div class="prog"><i id="gProg"></i></div>
@@ -295,6 +327,8 @@
       <div class="card"><h3>💡 시험 팁</h3><p class="muted" id="cbtTip"></p></div>
     </div>
     <div id="cbtRun" class="hidden">
+      <div id="cbtTimer" class="clock cbtfloat">⏱ 0:00</div>
+      <div id="cbtBar" class="cbtbar"></div>
       <div id="cbtList"></div>
       <button class="btn primary" onclick="gradeCbt()">채점하기</button>
     </div>
@@ -304,7 +338,7 @@
         <div class="lab"><span id="cbtCorrect">0</span> / <span id="cbtTotal">10</span> 정답 · 소요 <span id="cbtTime">0</span>초</div>
         <div class="wronglist" id="cbtWrong"></div>
       </div>
-      <button class="btn primary" id="cbtSubmit" style="margin-top:14px">📤 선생님께 결과 제출</button>
+      <button class="btn primary" id="cbtSubmit" style="margin-top:14px" onclick="submitExam()">📤 선생님께 결과 제출</button>
       <button class="btn ghost" style="width:100%;margin-top:10px" onclick="reviewCbt()">오답 다시 보기</button>
       <button class="btn ghost" style="width:100%;margin-top:10px" onclick="resetCbt()">다시 풀기</button>
     </div>
@@ -316,6 +350,55 @@
     <div class="catbar" id="solveCats"></div>
     <button class="btn ghost" style="width:100%;margin-top:10px" onclick="window.print()">🖨️ 이 풀이 인쇄 / PDF 저장</button>
     <div id="solveList"></div>
+  </section>
+
+  <!-- ══════════ 모의고사 (실전 종합) ══════════ -->
+  <section id="mock" class="view">
+    <div id="mockHome">
+      <button class="btn ghost" style="padding:8px 12px;font-size:12.5px" onclick="goHub()">← 홈</button>
+      <p class="lead">여러 영역을 묶어 <b>실전처럼</b> 풀어봅니다. 추천 세트를 고르거나 분야를 직접 선택하세요.
+         문제·보기는 풀 때마다 <b>랜덤</b>으로 섞이고 <b>시간</b>이 측정됩니다.</p>
+      <div class="card"><h3>⭐ 추천 세트</h3>
+        <p class="muted" style="margin:0 0 10px">공기업·공무원 고졸채용에서 중시하는 영역으로 묶었습니다.</p>
+        <div id="mockReco" class="recogrid"></div>
+      </div>
+      <div class="card"><h3>🧩 분야 직접 선택</h3>
+        <div id="mockAreas" class="chkgrid"></div>
+      </div>
+      <div class="card">
+        <div class="mockopt">
+          <label>난이도
+            <select id="mockMode" onchange="updateMockInfo()">
+              <option value="real">실전 복합 포함 (권장)</option>
+              <option value="hard">심화 문제만</option>
+            </select>
+          </label>
+          <label>문항 수
+            <select id="mockCount">
+              <option>10</option><option selected>20</option><option>30</option><option>40</option>
+            </select>
+          </label>
+        </div>
+        <div id="mockPoolInfo" class="muted" style="margin:10px 0">영역을 1개 이상 선택하세요.</div>
+        <button class="btn primary" onclick="startMock()">🎯 모의고사 시작</button>
+      </div>
+    </div>
+    <div id="mockRun" class="hidden">
+      <div id="mockTimer" class="clock cbtfloat">⏱ 0:00</div>
+      <div id="mockBar" class="cbtbar"></div>
+      <div id="mockList"></div>
+      <button class="btn primary" onclick="gradeCbt()">채점하기</button>
+    </div>
+    <div id="mockResult" class="hidden">
+      <div class="scorecard">
+        <div class="big"><span id="mockScore">0</span>점</div>
+        <div class="lab"><span id="mockCorrect">0</span> / <span id="mockTotal">0</span> 정답 · 소요 <span id="mockTime">0</span>초</div>
+        <div class="wronglist" id="mockWrong"></div>
+      </div>
+      <button class="btn primary" id="mockSubmit" style="margin-top:14px" onclick="submitExam()">📤 선생님께 결과 제출</button>
+      <button class="btn ghost" style="width:100%;margin-top:10px" onclick="reviewCbt()">오답 다시 보기</button>
+      <button class="btn ghost" style="width:100%;margin-top:10px" onclick="resetMockConfig()">다시 고르기</button>
+    </div>
   </section>
 
   <p class="note">NCS 직업기초능력 · 학습용 자체 제작 문항 (스캔 기출은 추후 추가 예정)</p>
