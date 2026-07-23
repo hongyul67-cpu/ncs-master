@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NCS 직업기초능력 마스터</title>
+<style>
+  :root{
+    --bg:#070d1a; --bg2:#0c1730; --card:#0d1a33; --card2:#122145;
+    --line:#243456; --line2:#2f4a80;
+    --ink:#eaf1ff; --sub:#9db0d6; --dim:#8093ba;
+    --cyan:#22d3ee; --blue:#3b82f6; --green:#34d399; --amber:#fbbf24;
+    --red:#fb7185; --violet:#a78bfa; --orange:#fb923c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:radial-gradient(1200px 700px at 50% -10%,#132b5c,transparent),
+               linear-gradient(180deg,#0a1428,#070d1a 40%);
+    background-color:var(--bg);
+    color:var(--ink);
+    font-family:system-ui,"Segoe UI",Roboto,"Malgun Gothic",sans-serif;
+    -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:780px;margin:0 auto;padding:0 14px 90px}
+  button{font-family:inherit}
+
+  /* ── 헤더 ── */
+  header{position:sticky;top:0;z-index:50;background:rgba(7,13,26,.9);
+    backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:9px 0 7px}
+  .hd{max-width:780px;margin:0 auto;padding:0 14px}
+  .hd-top{display:flex;align-items:center;gap:10px}
+  .logo{font-size:18px;font-weight:900;letter-spacing:-.5px;display:flex;align-items:center;gap:7px;
+    background:none;border:0;color:var(--ink);cursor:pointer;padding:0}
+  .logo b{color:var(--cyan)}
+  .spacer{flex:1}
+  .lvl{display:flex;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:3px}
+  .lvl button{border:0;background:transparent;color:var(--sub);font-weight:800;font-size:12.5px;
+    padding:6px 13px;border-radius:999px;cursor:pointer;transition:.15s}
+  .lvl button.on{background:linear-gradient(135deg,var(--blue),var(--violet));color:#fff}
+  .lvl button.on.hard{background:linear-gradient(135deg,#f97316,var(--red))}
+
+  /* 영역 표시줄 + 하위 네비 */
+  .abar{display:none;align-items:center;gap:8px;margin-top:9px}
+  .abar.on{display:flex}
+  .achip{display:flex;align-items:center;gap:7px;font-weight:800;font-size:13.5px;
+    background:var(--card2);border:1px solid var(--line2);border-radius:999px;padding:6px 12px}
+  .abar .change{background:transparent;border:0;color:var(--dim);font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline}
+  nav{display:flex;gap:6px;margin-top:9px;overflow-x:auto;scrollbar-width:none}
+  nav.on{display:flex} nav{display:none}
+  nav::-webkit-scrollbar{display:none}
+  nav button{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--sub);
+    font-weight:800;font-size:13px;padding:8px 14px;border-radius:11px;cursor:pointer;white-space:nowrap}
+  nav button.on{background:var(--card2);color:var(--ink);border-color:var(--line2)}
+
+  /* ── 뷰 ── */
+  .view{display:none;animation:fade .25s ease}
+  .view.on{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  h2.sec{font-size:17px;margin:20px 2px 10px;display:flex;align-items:center;gap:8px}
+  h2.sec .n{font-size:12px;font-weight:800;color:#06283a;background:var(--amber);border-radius:7px;padding:3px 8px}
+  p.lead{color:var(--sub);font-size:14px;line-height:1.7;margin:8px 2px 0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:14px}
+  .card h3{margin:0 0 6px;font-size:16px}
+  .muted{color:var(--sub);font-size:13.5px;line-height:1.7}
+
+  /* 홈 허브 */
+  .hero{background:linear-gradient(150deg,#10224b,#0b1630);border:1px solid var(--line2);
+    border-radius:20px;padding:22px 18px;margin-top:16px;text-align:center}
+  .hero .big{font-size:22px;font-weight:900;line-height:1.35}
+  .hero .big em{font-style:normal;color:var(--cyan)}
+  .hero p{color:var(--sub);font-size:13.5px;line-height:1.7;margin:10px 4px 0}
+  .pill3{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-top:13px}
+  .pill3 span{font-size:12px;font-weight:800;padding:6px 12px;border-radius:999px;
+    background:#0e2038;border:1px solid var(--line2);color:var(--ink)}
+  .pill3 span.hot{background:linear-gradient(135deg,var(--blue),var(--violet));border-color:transparent}
+
+  .areas{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:14px}
+  @media(max-width:520px){.areas{grid-template-columns:1fr}}
+  .acard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;
+    cursor:pointer;transition:.15s;text-align:left;color:var(--ink);position:relative;overflow:hidden}
+  .acard:hover{border-color:var(--line2);transform:translateY(-2px);background:var(--card2)}
+  .acard.soon{opacity:.55;cursor:not-allowed}
+  .acard .ico{font-size:28px}
+  .acard .t{font-weight:900;font-size:16px;margin-top:8px}
+  .acard .d{color:var(--sub);font-size:12.5px;line-height:1.55;margin-top:5px;min-height:34px}
+  .acard .st{margin-top:10px;font-size:11.5px;font-weight:800}
+  .acard .st.ready{color:var(--green)} .acard .st.soon{color:var(--dim)}
+  .acard .bar{position:absolute;left:0;top:0;height:4px;width:100%;background:var(--cyan)}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+  @media(max-width:520px){.grid{grid-template-columns:1fr}}
+  .tile{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:15px;
+    cursor:pointer;transition:.15s;text-align:left;color:var(--ink)}
+  .tile:hover{border-color:var(--line2);transform:translateY(-2px);background:var(--card2)}
+  .tile .ico{font-size:25px}
+  .tile .t{font-weight:800;font-size:15px;margin-top:7px}
+  .tile .d{color:var(--sub);font-size:12.5px;line-height:1.55;margin-top:4px}
+  .tile .go{color:var(--cyan);font-size:12.5px;font-weight:800;margin-top:9px}
+
+  /* 배우기 아코디언 */
+  .lk{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-top:10px;overflow:hidden}
+  .lk>button{width:100%;text-align:left;background:transparent;border:0;color:var(--ink);
+    padding:15px 16px;font-size:15px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:10px}
+  .lk>button .ci{font-size:20px}
+  .lk>button .ar{margin-left:auto;color:var(--dim);transition:.2s;font-size:13px}
+  .lk.open>button .ar{transform:rotate(90deg);color:var(--cyan)}
+  .lk .body{display:none;padding:0 16px 16px;border-top:1px solid var(--line)}
+  .lk.open .body{display:block;animation:fade .2s ease}
+  .lk .body h4{margin:14px 0 6px;font-size:14px;color:var(--cyan)}
+  .lk .body p{margin:6px 0;color:var(--sub);font-size:13.7px;line-height:1.75}
+  .lk .body b{color:var(--ink)}
+  .ex{background:#091327;border:1px solid var(--line);border-left:3px solid var(--amber);
+    border-radius:10px;padding:11px 13px;margin:10px 0;font-size:13.5px;line-height:1.7}
+  .ex .q{color:var(--ink);font-weight:700}
+  .ex .a{color:var(--green);font-weight:700;margin-top:6px;display:block}
+  .ex .why{color:var(--sub);margin-top:5px;display:block;font-size:13px}
+  table.logic{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px}
+  table.logic th,table.logic td{border:1px solid var(--line);padding:8px 6px;text-align:center;color:var(--ink)}
+  table.logic th{background:#0e2038;color:var(--sub);font-weight:800}
+  table.logic td b{color:var(--cyan)}
+  .tag{display:inline-block;font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;margin-left:6px}
+  .tag.b{background:#0e2038;color:var(--cyan);border:1px solid var(--line2)}
+  .tag.h{background:#3a1e10;color:var(--orange);border:1px solid #7c3a1a}
+
+  /* 게임 */
+  .qhud{display:flex;gap:8px;align-items:center;margin-top:14px}
+  #hud{flex:1}
+  .prog{height:7px;background:#0e1b34;border-radius:99px;overflow:hidden;margin:14px 0 4px}
+  .prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--blue));transition:width .3s}
+  .qbox{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 16px;margin-top:12px}
+  .qmeta{font-size:11.5px;font-weight:800;color:var(--dim);letter-spacing:.3px}
+  .qtext{font-size:16px;line-height:1.65;margin:8px 0 4px;font-weight:600;white-space:pre-line}
+  .qcond{background:#091327;border:1px solid var(--line);border-radius:10px;padding:10px 12px;
+    margin:11px 0;font-size:13.5px;line-height:1.8;color:var(--sub);white-space:pre-line}
+  .qcond b{color:var(--ink)}
+  .dtable{width:100%;border-collapse:collapse;margin:11px 0;font-size:13px}
+  .dtable th,.dtable td{border:1px solid var(--line2);padding:7px 6px;text-align:center;color:var(--ink)}
+  .dtable th{background:#12294a;color:var(--cyan);font-weight:800}
+  .opts{display:flex;flex-direction:column;gap:9px;margin-top:12px}
+  .opt{text-align:left;background:var(--card2);border:1px solid var(--line);color:var(--ink);
+    font-size:14.5px;line-height:1.5;padding:13px 14px;border-radius:12px;cursor:pointer;
+    display:flex;gap:10px;align-items:flex-start;transition:.12s}
+  .opt:hover{border-color:var(--line2)}
+  .opt .k{font-weight:900;color:var(--cyan);flex:0 0 auto}
+  .opt.ok{background:#0f3a2c;border-color:var(--green);color:#d1fae5}
+  .opt.ok .k{color:var(--green)}
+  .opt.no{background:#3a1520;border-color:var(--red);color:#fecdd3}
+  .opt.no .k{color:var(--red)}
+  .opt:disabled{cursor:default}
+  .fb{margin-top:12px;padding:12px 14px;border-radius:12px;font-size:13.5px;line-height:1.7;display:none}
+  .fb.show{display:block;animation:fade .2s}
+  .fb.good{background:#0f2c22;border:1px solid #1c6b4d;color:#bbf7d0}
+  .fb.bad{background:#331520;border:1px solid #7c2d3a;color:#fecdd3}
+  .fb b{color:#fff}
+  .btn{border:0;border-radius:13px;padding:13px 18px;font-size:15px;font-weight:800;cursor:pointer}
+  .btn.primary{background:linear-gradient(135deg,var(--cyan),var(--blue));color:#04223a;width:100%;margin-top:12px}
+  .btn.ghost{background:var(--card2);color:var(--ink);border:1px solid var(--line2)}
+  .btn:active{transform:translateY(1px)}
+
+  .start{background:linear-gradient(150deg,#10224b,#0b1630);border:1px solid var(--line2);
+    border-radius:18px;padding:20px;text-align:center;margin-top:14px}
+  .start .ico{font-size:38px}
+  .start h3{margin:8px 0 4px;font-size:19px}
+  .start p{color:var(--sub);font-size:13.5px;margin:0 0 14px;line-height:1.6}
+
+  /* CBT */
+  .cbtq{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px;margin-top:12px}
+  .cbtq .num{font-weight:900;color:var(--cyan);font-size:13px}
+  .cbtq .qt{font-size:15px;line-height:1.6;margin:6px 0 2px;white-space:pre-line}
+  .cbtq .cnd{background:#091327;border:1px solid var(--line);border-radius:9px;padding:9px 11px;
+    margin:9px 0;font-size:13px;line-height:1.75;color:var(--sub);white-space:pre-line}
+  .cbto{display:flex;flex-direction:column;gap:7px;margin-top:9px}
+  .cbto label{display:flex;gap:9px;align-items:flex-start;background:var(--card2);border:1px solid var(--line);
+    border-radius:10px;padding:10px 12px;font-size:14px;line-height:1.5;cursor:pointer;color:var(--ink)}
+  .cbto label:hover{border-color:var(--line2)}
+  .cbto input{margin-top:3px;accent-color:var(--cyan);flex:0 0 auto}
+  .cbto label.pick{border-color:var(--cyan);background:#0e2b3a}
+  .cbto label.correct{border-color:var(--green);background:#0f3a2c}
+  .cbto label.wrong{border-color:var(--red);background:#3a1520}
+  .sol{margin-top:10px;padding:11px 13px;background:#091327;border:1px solid var(--line);
+    border-left:3px solid var(--cyan);border-radius:9px;font-size:13px;line-height:1.7;color:var(--sub);display:none}
+  .sol.show{display:block}
+  .sol b{color:var(--ink)}
+  .scorecard{background:linear-gradient(150deg,#10224b,#0b1630);border:1px solid var(--line2);
+    border-radius:18px;padding:22px;text-align:center;margin-top:14px}
+  .scorecard .big{font-size:44px;font-weight:900;color:var(--cyan);line-height:1}
+  .scorecard .lab{color:var(--sub);font-size:13px;margin-top:6px}
+  .wronglist{font-size:13px;color:var(--sub);margin-top:10px}
+
+  /* 전체 풀이 모음집 */
+  .solv{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:14px 15px;margin-top:11px}
+  .solv .sn{font-size:11.5px;font-weight:800;color:var(--violet);letter-spacing:.3px}
+  .solv .sq{font-size:14.5px;line-height:1.6;margin:5px 0;white-space:pre-line;font-weight:600}
+  .solv .sc{background:#091327;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:7px 0;
+    font-size:12.5px;line-height:1.7;color:var(--sub);white-space:pre-line}
+  .solv .sa{color:var(--green);font-weight:800;font-size:13.5px;margin-top:6px}
+  .solv .se{color:var(--sub);font-size:12.8px;line-height:1.7;margin-top:5px}
+  .solv .se b{color:var(--ink)}
+  .catbar{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 4px}
+  .catbar button{border:1px solid var(--line);background:var(--card);color:var(--sub);font-weight:800;
+    font-size:12.5px;padding:7px 12px;border-radius:9px;cursor:pointer}
+  .catbar button.on{background:var(--card2);color:var(--ink);border-color:var(--line2)}
+
+  .note{font-size:12px;color:var(--dim);text-align:center;margin-top:24px;line-height:1.7}
+  .hidden{display:none!important}
+  @media print{
+    header,nav,.abar,.btn,.catbar,.note{display:none!important}
+    body{background:#fff;color:#000}
+    .solv{border:1px solid #ccc;break-inside:avoid;background:#fff}
+    .solv .sc{background:#f4f4f4} .solv .se b{color:#000} .solv .se,.solv .sc{color:#333}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="hd">
+    <div class="hd-top">
+      <button class="logo" onclick="goHub()">🎓 <span>NCS <b>직업기초능력</b></span></button>
+      <div class="spacer"></div>
+      <div class="lvl">
+        <button id="lvBasic" class="on" onclick="setLevel('basic')">기초</button>
+        <button id="lvHard" onclick="setLevel('hard')">심화</button>
+      </div>
+    </div>
+    <div class="abar" id="abar">
+      <span class="achip" id="achip"></span>
+      <button class="change" onclick="goHub()">영역 바꾸기</button>
+    </div>
+    <nav id="nav">
+      <button data-v="learn" onclick="go('learn')">📖 배우기</button>
+      <button data-v="play" onclick="go('play')">🎮 게임</button>
+      <button data-v="cbt" onclick="go('cbt')">📝 실전 점검</button>
+      <button data-v="solve" onclick="go('solve')">📚 전체 풀이</button>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- ══════════ 허브 ══════════ -->
+  <section id="hub" class="view on">
+    <div class="hero">
+      <div class="big">공기업 필기의 <em>승부처</em><br>NCS 직업기초능력</div>
+      <p>공공기관·공기업 고졸채용 필기(NCS)는 <b>의사소통·수리·문제해결</b> 세 영역이 당락을 가릅니다.
+         영역을 골라 <b>배우기 → 게임 → 실전 점검</b> 순으로 익히세요.</p>
+      <div class="pill3">
+        <span class="hot">의사소통</span><span class="hot">수리</span><span class="hot">문제해결</span>
+        <span>+ 자원·정보·기술·조직이해 등</span>
+      </div>
+    </div>
+    <h2 class="sec"><span class="n">영역 선택</span> 무엇을 공부할까요?</h2>
+    <div class="areas" id="areaCards"></div>
+    <div class="card">
+      <h3>🎚️ 난이도 · 학년 가이드</h3>
+      <p class="muted">우측 위 <b>기초/심화</b> 버튼으로 수준을 바꿉니다. 권장: <b>1학년=기초</b>,
+      <b>2·3학년=심화</b>. 각 영역 안에서 <b>전체 풀이</b> 탭을 열면 모든 문항의 정답·해설을 한눈에 보고
+      복습하거나 인쇄할 수 있습니다.</p>
+    </div>
+    <p class="note">선생님이 결과 수집 링크로 열면 게임·점검 결과를 반·번호와 함께 제출할 수 있습니다.</p>
+  </section>
+
+  <!-- ══════════ 배우기 ══════════ -->
+  <section id="learn" class="view">
+    <p class="lead">유형을 눌러 펼치면 <b>개념 → 예시 → 풀이법</b>이 나옵니다. (난이도: <span class="lvtxt">기초</span>)</p>
+    <div id="learnList"></div>
+    <button class="btn primary" onclick="go('play')" style="margin-top:18px">배웠으면 게임으로 연습하기 🎮</button>
+  </section>
+
+  <!-- ══════════ 게임 ══════════ -->
+  <section id="play" class="view">
+    <div id="playHome">
+      <p class="lead">유형을 골라 연습하세요. 맞히면 콤보와 점수가 오릅니다. (난이도: <span class="lvtxt">기초</span>)</p>
+      <div class="grid" id="gameTiles"></div>
+    </div>
+    <div id="playRun" class="hidden">
+      <div class="qhud">
+        <div id="hud"></div>
+        <button class="btn ghost" style="padding:8px 12px;font-size:12.5px" onclick="quitGame()">← 종료</button>
+      </div>
+      <div class="prog"><i id="gProg"></i></div>
+      <div class="qbox" id="gCard"></div>
+    </div>
+  </section>
+
+  <!-- ══════════ 실전 점검 ══════════ -->
+  <section id="cbt" class="view">
+    <div id="cbtHome">
+      <div class="start">
+        <div class="ico">📝</div>
+        <h3>실전 점검 (<span class="lvtxt">기초</span>)</h3>
+        <p>실제 시험처럼 10문항을 풉니다. 중간 정답 표시 없이 끝까지 푼 뒤<br>한 번에 채점하고 오답을 확인합니다.</p>
+        <button class="btn primary" style="max-width:280px;margin:0 auto" onclick="startCbt()">점검 시작 →</button>
+      </div>
+      <div class="card"><h3>💡 시험 팁</h3><p class="muted" id="cbtTip"></p></div>
+    </div>
+    <div id="cbtRun" class="hidden">
+      <div id="cbtList"></div>
+      <button class="btn primary" onclick="gradeCbt()">채점하기</button>
+    </div>
+    <div id="cbtResult" class="hidden">
+      <div class="scorecard">
+        <div class="big"><span id="cbtScore">0</span>점</div>
+        <div class="lab"><span id="cbtCorrect">0</span> / 10 정답 · 소요 <span id="cbtTime">0</span>초</div>
+        <div class="wronglist" id="cbtWrong"></div>
+      </div>
+      <button class="btn primary" id="cbtSubmit" style="margin-top:14px">📤 선생님께 결과 제출</button>
+      <button class="btn ghost" style="width:100%;margin-top:10px" onclick="reviewCbt()">오답 다시 보기</button>
+      <button class="btn ghost" style="width:100%;margin-top:10px" onclick="resetCbt()">다시 풀기</button>
+    </div>
+  </section>
+
+  <!-- ══════════ 전체 풀이 모음집 ══════════ -->
+  <section id="solve" class="view">
+    <p class="lead"><b><span class="lvtxt">기초</span></b> 난이도의 모든 문항과 정답·풀이입니다. 수업·복습·인쇄용으로 쓰세요.</p>
+    <div class="catbar" id="solveCats"></div>
+    <button class="btn ghost" style="width:100%;margin-top:10px" onclick="window.print()">🖨️ 이 풀이 인쇄 / PDF 저장</button>
+    <div id="solveList"></div>
+  </section>
+
+  <p class="note">NCS 직업기초능력 · 학습용 자체 제작 문항 (스캔 기출은 추후 추가 예정)</p>
+</div>
+
+<script src="https://hongyul67-cpu.github.io/links/fx.js"></script>
+<script src="https://hongyul67-cpu.github.io/links/collector.js"
+        data-tool="NCS 직업기초능력" data-classes="1,2,3,4,5,6,7,8,9,10" data-max-num="40"></script>
+<script src="ncs-data.js"></script>
+<script src="ncs-app.js"></script>
+</body>
+</html>
