@@ -216,6 +216,7 @@ function gradeCbt(){
   document.getElementById('cbtResult').classList.remove('hidden');
   document.getElementById('cbtScore').textContent=score;
   document.getElementById('cbtCorrect').textContent=correct;
+  document.getElementById('cbtTotal').textContent=s.list.length;
   document.getElementById('cbtTime').textContent=dur;
   document.getElementById('cbtWrong').innerHTML=wrong.length
     ? '틀린 문제: '+wrong.map(function(n){return 'Q'+n;}).join(', ') : '🎉 전부 맞혔어요!';

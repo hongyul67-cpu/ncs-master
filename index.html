@@ -289,7 +289,7 @@
       <div class="start">
         <div class="ico">📝</div>
         <h3>실전 점검 (<span class="lvtxt">기초</span>)</h3>
-        <p>실제 시험처럼 10문항을 풉니다. 중간 정답 표시 없이 끝까지 푼 뒤<br>한 번에 채점하고 오답을 확인합니다.</p>
+        <p>실제 시험처럼 여러 문항을 풉니다. 중간 정답 표시 없이 끝까지 푼 뒤<br>한 번에 채점하고 오답을 확인합니다.</p>
         <button class="btn primary" style="max-width:280px;margin:0 auto" onclick="startCbt()">점검 시작 →</button>
       </div>
       <div class="card"><h3>💡 시험 팁</h3><p class="muted" id="cbtTip"></p></div>
@@ -301,7 +301,7 @@
     <div id="cbtResult" class="hidden">
       <div class="scorecard">
         <div class="big"><span id="cbtScore">0</span>점</div>
-        <div class="lab"><span id="cbtCorrect">0</span> / 10 정답 · 소요 <span id="cbtTime">0</span>초</div>
+        <div class="lab"><span id="cbtCorrect">0</span> / <span id="cbtTotal">10</span> 정답 · 소요 <span id="cbtTime">0</span>초</div>
         <div class="wronglist" id="cbtWrong"></div>
       </div>
       <button class="btn primary" id="cbtSubmit" style="margin-top:14px">📤 선생님께 결과 제출</button>
