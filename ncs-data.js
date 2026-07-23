@@ -596,10 +596,16 @@ self:{
      hard:`<p>자기개발은 <b>일과 관련해</b> 이루어지며, 개별적 과정이라 사람마다 다릅니다.</p>
        <div class="ex"><span class="q">설계 전략</span><span class="why">장·단기 목표를 함께 세우고, 인간관계를 고려하며, 현재의 직무 상황을 반영합니다.</span></div>`},
     {ic:'🪟', title:'자아인식 — 조하리의 창',
-     basic:`<p>나를 아는 방법: <b>내가 아는 나 + 남이 아는 나</b>를 합쳐 봅니다.</p>
+     basic:`<p>나를 정확히 알려면 <b>내가 아는 나</b>와 <b>남이 아는 나</b>를 겹쳐 봐야 합니다.
+       이 두 축으로 자아를 네 칸으로 나눈 것이 <b>조하리의 창</b>입니다.</p>
        <table class="logic"><tr><th></th><th>내가 앎</th><th>내가 모름</th></tr>
-       <tr><th>남이 앎</th><td><b>열린 창</b><br>(공개된 나)</td><td><b>눈먼 창</b><br>(내가 모르는 나)</td></tr>
-       <tr><th>남이 모름</th><td><b>숨겨진 창</b><br>(비밀의 나)</td><td><b>미지의 창</b><br>(아무도 모름)</td></tr></table>`,
+       <tr><th>남이 앎</th><td><b>열린 창</b><br>(공개된 나)</td><td><b>눈먼 창</b><br>(나만 모르는 나)</td></tr>
+       <tr><th>남이 모름</th><td><b>숨겨진 창</b><br>(비밀의 나)</td><td><b>미지의 창</b><br>(아무도 모름)</td></tr></table>
+       <h4>각 창을 어떻게 다루나</h4>
+       <p>• <b>열린 창</b>을 키우는 게 목표 — 소통이 잘 되는 사람일수록 이 칸이 큽니다.<br>
+          • <b>눈먼 창</b>(내 습관·말버릇 등)은 <b>남의 피드백</b>을 들어야 줄어듭니다.<br>
+          • <b>숨겨진 창</b>은 <b>나를 솔직히 드러낼(자기공개)</b> 때 줄어듭니다.</p>
+       <div class="ex"><span class="q">"나는 몰랐는데 동료가 '너 말 자를 때가 많아'라고 알려줬다"</span><span class="a">→ 눈먼 창이 줄고 열린 창이 커진 것</span><span class="why">피드백은 눈먼 창을 줄이는 열쇠. 그래서 자아인식엔 '남의 시선'도 필요합니다.</span></div>`,
      hard:`<p><b>조하리의 창(Johari's Window)</b>은 자아를 네 영역으로 나눕니다. 소통·피드백이 늘수록 '열린 창'이 커집니다.</p>
        <div class="ex"><span class="q">자아인식 방법</span><span class="why">내적: 흥미·적성 검사, 성찰. 외적: 타인의 피드백(눈먼 창을 줄임).</span></div>`},
     {ic:'🎯', title:'자기관리 — SMART 목표',
@@ -699,8 +705,15 @@ resource:{
      hard:`<p>자원관리 4단계: <b>필요 자원 확인 → 이용 가능 자원 수집 → 활용 계획 수립 → 계획대로 수행</b>.</p>
        <div class="ex"><span class="q">낭비 요인</span><span class="why">비계획적 행동, 편리성 추구, 자원에 대한 인식 부족, 노하우 부족.</span></div>`},
     {ic:'⏰', title:'시간관리',
-     basic:`<p>시간은 누구에게나 똑같이 주어지고, <b>저장할 수 없으며</b>, 쓰기에 따라 가치가 달라집니다.</p>
-       <p>우선순위는 <b>중요도</b>와 <b>긴급도</b>로 정합니다.</p>`,
+     basic:`<p>시간은 특별한 자원입니다. <b>누구에게나 똑같이</b> 주어지고, <b>저장할 수 없고</b>, 흐름이 일정하며,
+       쓰기에 따라 <b>가치(밀도)가 달라집니다</b>. 그래서 '무엇을 먼저 하느냐'가 중요합니다.</p>
+       <h4>시간관리 매트릭스 (중요도 × 긴급도)</h4>
+       <table class="logic"><tr><th></th><th>긴급함</th><th>긴급하지 않음</th></tr>
+       <tr><th>중요함</th><td>① 즉시 처리<br>(마감·위기)</td><td><b>② 계획하여 처리</b><br>(준비·예방·공부)</td></tr>
+       <tr><th>중요하지 않음</th><td>③ 위임<br>(잡무·일부 연락)</td><td>④ 제거<br>(시간 낭비)</td></tr></table>
+       <p>대부분은 ①(급한 불 끄기)에 매달립니다. 그런데 <b>성공하는 사람은 ②</b>(중요하지만 급하지 않은 일)에
+       시간을 투자합니다. 미리 준비하니 ①로 번질 일이 줄어드는 거죠.</p>
+       <div class="ex"><span class="q">"한 달 뒤 시험을 위해 매일 조금씩 공부한다"는 어느 칸?</span><span class="a">→ ② 중요·비긴급 (계획 영역)</span><span class="why">지금 급하진 않지만 가장 중요한 습관. 여기에 투자할수록 나중에 벼락치기(①)가 사라집니다.</span></div>`,
      hard:`<p><b>시간관리 매트릭스</b>(중요도×긴급도):</p>
        <table class="logic"><tr><th></th><th>긴급함</th><th>긴급하지 않음</th></tr>
        <tr><th>중요함</th><td>즉시 처리</td><td><b>계획하여 처리</b></td></tr>
@@ -808,8 +821,16 @@ relation:{
      hard:`<p>리더십 유형: <b>독재자형·민주주의형·자유방임형·변혁적</b>. 상황에 맞게 씁니다.</p>
        <div class="ex"><span class="q">임파워먼트(권한위임)</span><span class="why">구성원에게 권한·책임을 주어 잠재력을 끌어냄.</span></div>`},
     {ic:'⚔️', title:'갈등관리',
-     basic:`<p>갈등은 무조건 나쁜 게 아니라 <b>잘 관리하면</b> 성장의 계기가 됩니다.</p>
-       <p>해결 유형(토마스-킬만): <b>회피·경쟁·수용·타협·협력</b>. 서로 이기는 <b>협력(win-win)</b>이 이상적.</p>`,
+     basic:`<p>갈등은 <b>무조건 나쁜 게 아닙니다</b>. 방치하면 팀을 망치지만, 잘 다루면 더 나은 해결책과 성장을 만듭니다.</p>
+       <h4>갈등 해결의 5가지 방식 (토마스-킬만)</h4>
+       <table class="logic"><tr><th>방식</th><th>내 이익</th><th>상대 이익</th></tr>
+       <tr><td>회피</td><td>포기</td><td>포기 (일단 피함)</td></tr>
+       <tr><td>경쟁</td><td>챙김</td><td>포기 (내가 이김)</td></tr>
+       <tr><td>수용</td><td>포기</td><td>챙김 (내가 양보)</td></tr>
+       <tr><td>타협</td><td>절반</td><td>절반 (서로 양보)</td></tr>
+       <tr><td><b>협력</b></td><td><b>챙김</b></td><td><b>챙김 (win-win)</b></td></tr></table>
+       <p>가장 이상적인 것은 <b>협력(win-win)</b> — 서로의 <b>진짜 관심(니즈)</b>을 찾아 둘 다 만족하는 대안을 만드는 것입니다.</p>
+       <div class="ex"><span class="q">두 사람이 창문을 놓고 "열자 vs 닫자"로 다툰다면?</span><span class="a">→ 왜 열려는지(환기)·왜 닫으려는지(추위)를 물어 → "옆방 창을 연다"처럼 둘 다 만족시키기</span><span class="why">겉의 주장이 아니라 속의 이유를 찾는 게 win-win의 핵심.</span></div>`,
      hard:`<p>갈등 해결의 걸림돌: 자기 입장만 고집, 감정적 대응. 촉진: <b>경청·공감·공동 목표</b>.</p>
        <div class="ex"><span class="q">win-win 전략</span><span class="why">서로의 진짜 관심(니즈)을 찾아 둘 다 만족하는 대안을 만듦.</span></div>`},
     {ic:'💬', title:'협상과 고객서비스',
@@ -909,10 +930,17 @@ info:{
      hard:`<p>정보 수집은 <b>목적(Why)</b>을 분명히 한 뒤 대상·방법을 정합니다. 신뢰할 수 있는 출처인지 확인해야 합니다.</p>
        <div class="ex"><span class="q">정보 관리 3원칙</span><span class="why">목적성·용이성·유용성. 필요할 때 쉽게 찾아 쓸 수 있어야 함.</span></div>`},
     {ic:'📊', title:'컴퓨터 활용 — 엑셀·DB',
-     basic:`<p>업무에 자주 쓰는 <b>엑셀 함수</b>:</p>
-       <table class="logic"><tr><th>함수</th><th>기능</th></tr>
-       <tr><td>SUM</td><td>합계</td></tr><tr><td>AVERAGE</td><td>평균</td></tr>
-       <tr><td>COUNT</td><td>개수</td></tr><tr><td>MAX/MIN</td><td>최대/최소</td></tr></table>`,
+     basic:`<p>엑셀은 표로 계산·정리하는 도구입니다. 함수는 <b>=함수명(범위)</b> 꼴로 씁니다. 예: <b>=SUM(A1:A10)</b>.</p>
+       <table class="logic"><tr><th>함수</th><th>기능</th><th>언제</th></tr>
+       <tr><td><b>SUM</b></td><td>합계</td><td>매출 총합</td></tr>
+       <tr><td><b>AVERAGE</b></td><td>평균</td><td>평균 점수</td></tr>
+       <tr><td><b>COUNT</b></td><td>숫자 셀 개수</td><td>응답 수</td></tr>
+       <tr><td><b>MAX/MIN</b></td><td>최대/최소</td><td>최고·최저값</td></tr>
+       <tr><td><b>IF</b></td><td>조건 판단</td><td>합격/불합격</td></tr>
+       <tr><td><b>COUNTIF</b></td><td>조건 맞는 개수</td><td>80점 이상 몇 명</td></tr>
+       <tr><td><b>VLOOKUP</b></td><td>표에서 값 찾기</td><td>사번으로 이름 찾기</td></tr></table>
+       <div class="ex"><span class="q">"점수가 60 이상이면 합격, 아니면 불합격"을 자동으로?</span><span class="a">→ =IF(A1&gt;=60, "합격", "불합격")</span><span class="why">IF(조건, 참일 때, 거짓일 때). 조건을 다루는 함수가 IF·COUNTIF입니다.</span></div>
+       <p><b>참고:</b> 자료를 표(테이블)로 체계적으로 저장·검색하는 것이 <b>데이터베이스(DB)</b>입니다. 중복을 줄이고 여럿이 공유하기 좋습니다.</p>`,
      hard:`<p>조건을 다루는 함수: <b>IF</b>(조건 판단), <b>COUNTIF</b>(조건 개수), <b>VLOOKUP</b>(표에서 값 찾기).</p>
        <div class="ex"><span class="q">데이터베이스(DB)</span><span class="why">자료를 표(테이블)로 체계적으로 저장·검색. 중복을 줄이고 공유가 쉬움.</span></div>`},
     {ic:'🔒', title:'정보보안 · 개인정보',
@@ -1015,10 +1043,14 @@ tech:{
      hard:`<p><b>기술경영자</b>는 기술을 이해하면서 <b>경영·관리 역량</b>도 갖춰야 합니다(기술과 경영의 다리).</p>
        <div class="ex"><span class="q">기술 적용의 고려사항</span><span class="why">기술의 잠재력, 수명 주기, 우리 전략과의 부합, 비용.</span></div>`},
     {ic:'📜', title:'산업재산권',
-     basic:`<p>기술·디자인·상표를 보호하는 권리가 <b>산업재산권</b>입니다.</p>
-       <table class="logic"><tr><th>권리</th><th>대상</th></tr>
-       <tr><td><b>특허권</b></td><td>발명(높은 수준)</td></tr><tr><td><b>실용신안권</b></td><td>물품의 실용적 고안</td></tr>
-       <tr><td><b>디자인권</b></td><td>물품의 모양·형태</td></tr><tr><td><b>상표권</b></td><td>상품의 이름·로고</td></tr></table>`,
+     basic:`<p>내가 만든 기술·디자인·상표를 남이 함부로 못 쓰게 보호하는 권리가 <b>산업재산권</b>입니다.
+       특허청에 <b>등록해야</b> 보호받고, 네 가지가 있습니다.</p>
+       <table class="logic"><tr><th>권리</th><th>대상</th><th>예</th></tr>
+       <tr><td><b>특허권</b></td><td>수준 높은 <b>발명</b></td><td>새로운 배터리 기술</td></tr>
+       <tr><td><b>실용신안권</b></td><td>작은 <b>고안·개량</b></td><td>더 잡기 쉬운 손잡이</td></tr>
+       <tr><td><b>디자인권</b></td><td>물품의 <b>모양·형태</b></td><td>음료병 디자인</td></tr>
+       <tr><td><b>상표권</b></td><td>상품의 <b>이름·로고</b></td><td>브랜드 마크</td></tr></table>
+       <div class="ex"><span class="q">특허 vs 실용신안, 뭐가 다를까?</span><span class="a">→ 특허 = 수준 높은 발명, 실용신안 = 작은 개량·고안</span><span class="why">"아예 새로운 것"이면 특허, "기존 것을 조금 낫게"면 실용신안. 특허권은 보통 출원일로부터 <b>20년</b> 보호됩니다.</span></div>`,
      hard:`<p>산업재산권은 특허청에 <b>등록</b>해야 보호받습니다. 특허권은 보통 <b>출원일로부터 20년</b> 보호됩니다.</p>
        <div class="ex"><span class="q">특허 vs 실용신안</span><span class="why">특허=수준 높은 발명, 실용신안=작은 개량·고안.</span></div>`}
   ],
@@ -1106,8 +1138,14 @@ org:{
      hard:`<p>공식조직(회사·학교)과 비공식조직(동호회), 영리조직(기업)과 비영리조직(정부·NGO)을 구분합니다.</p>
        <div class="ex"><span class="q">조직 목표</span><span class="why">조직은 목표 달성을 위해 구조·문화·규칙을 갖춘 사람들의 모임입니다.</span></div>`},
     {ic:'📈', title:'경영이해 — 전략',
-     basic:`<p><b>경영 4요소</b>: 경영 목적 · 인적자원 · 자금 · 경영전략.</p>
-       <p>포터의 <b>본원적 경쟁전략</b>: 원가우위(싸게)·차별화(다르게)·집중화(특정 시장).</p>`,
+     basic:`<p>경영은 조직의 목표를 이루기 위한 활동입니다. <b>경영 4요소</b>는
+       <b>경영 목적 · 인적자원(사람) · 자금(돈) · 경영전략</b>입니다.</p>
+       <h4>포터의 본원적 경쟁전략 3가지</h4>
+       <table class="logic"><tr><th>전략</th><th>핵심</th><th>예</th></tr>
+       <tr><td><b>원가우위</b></td><td>남보다 <b>싸게</b></td><td>대량생산 저가 마트</td></tr>
+       <tr><td><b>차별화</b></td><td>남과 <b>다르게</b>(품질·브랜드)</td><td>프리미엄 브랜드</td></tr>
+       <tr><td><b>집중화</b></td><td>특정 <b>시장·고객</b>에 집중</td><td>유아 전용 제품</td></tr></table>
+       <div class="ex"><span class="q">"우리는 최고 품질과 브랜드로 승부한다" → 어떤 전략?</span><span class="a">→ 차별화 전략</span><span class="why">싸게=원가우위, 다르게=차별화, 좁게=집중화. 전략을 세울 때는 <b>SWOT</b>으로 강·약점과 기회·위협을 분석합니다.</span></div>`,
      hard:`<p>전략 수립엔 <b>SWOT</b>이 쓰입니다(문제해결 영역과 연결). 경영은 계획→실행→평가로 순환합니다.</p>
        <div class="ex"><span class="q">원가우위 vs 차별화</span><span class="why">원가우위=낮은 원가로 가격 경쟁, 차별화=품질·브랜드로 차이 만들기.</span></div>`},
     {ic:'🗂️', title:'조직체제 · 부서 업무',
@@ -1206,7 +1244,12 @@ ethic:{
      hard:`<p>직업의 특성: <b>계속성·사회성·경제성</b>. 직업은 생계 수단이자 사회 기여이며 자아실현의 장입니다.</p>
        <div class="ex"><span class="q">직업윤리가 필요한 이유</span><span class="why">개인의 신뢰와 조직·사회 전체의 건강을 지키기 위해.</span></div>`},
     {ic:'💪', title:'근로윤리 — 근면·정직·성실',
-     basic:`<p>• <b>근면</b>: 부지런히 일함(자발적 근면이 바람직)<br>• <b>정직</b>: 거짓 없이 진실함(신뢰의 바탕)<br>• <b>성실</b>: 정성스럽고 참됨(근면+정직을 아우름)</p>`,
+     basic:`<p><b>근로윤리</b>는 일 자체를 대하는 마음가짐으로, <b>근면·정직·성실</b> 세 가지입니다.</p>
+       <table class="logic"><tr><th>덕목</th><th>뜻</th></tr>
+       <tr><td><b>근면</b></td><td>부지런히 일함 — 시켜서 하는 것보다 <b>스스로(자발적)</b> 하는 근면이 바람직</td></tr>
+       <tr><td><b>정직</b></td><td>거짓 없이 진실함 — <b>신뢰의 바탕</b></td></tr>
+       <tr><td><b>성실</b></td><td>정성스럽고 참됨 — <b>근면과 정직을 아우르는</b> 태도</td></tr></table>
+       <div class="ex"><span class="q">왜 정직이 특히 중요할까?</span><span class="a">→ 한 번의 거짓말이 오래 쌓은 신뢰를 무너뜨리기 때문</span><span class="why">실수를 했을 때 숨기지 않고 <b>솔직히 알리고 바로잡는 것</b>이 정직한 직업인의 태도입니다. 신뢰가 있어야 조직도 개인도 오래갑니다.</span></div>`,
      hard:`<p><b>자발적 근면</b>(스스로)과 외부 강요에 의한 근면은 다릅니다. 진정한 근로윤리는 자발적입니다.</p>
        <div class="ex"><span class="q">정직의 힘</span><span class="why">한 번의 거짓이 오랜 신뢰를 무너뜨립니다. 작은 정직이 큰 신뢰를 만듭니다.</span></div>`},
     {ic:'🤲', title:'공동체윤리 — 봉사·책임·준법·예절',
