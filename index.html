@@ -169,6 +169,13 @@
     padding:10px 14px;margin-top:4px;font-size:13px;color:var(--sub);font-weight:700}
   .cbtbar b{color:var(--cyan)}
   /* 모의고사 */
+  .roundgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  @media(max-width:520px){.roundgrid{grid-template-columns:1fr}}
+  .roundbtn{text-align:left;background:var(--card2);border:1px solid var(--line2);color:var(--ink);
+    border-radius:11px;padding:11px 13px;cursor:pointer;font-family:inherit}
+  .roundbtn:hover{border-color:var(--cyan);transform:translateY(-1px)}
+  .roundbtn b{color:var(--ink);font-size:14px;display:block}
+  .roundbtn span{display:block;color:var(--sub);font-size:12px;margin-top:3px}
   .recogrid{display:flex;flex-direction:column;gap:8px}
   .recobtn{text-align:left;background:var(--card2);border:1px solid var(--line2);color:var(--ink);
     border-radius:11px;padding:11px 13px;cursor:pointer;font-family:inherit}
@@ -358,7 +365,11 @@
       <button class="btn ghost" style="padding:8px 12px;font-size:12.5px" onclick="goHub()">← 홈</button>
       <p class="lead">여러 영역을 묶어 <b>실전처럼</b> 풀어봅니다. 추천 세트를 고르거나 분야를 직접 선택하세요.
          문제·보기는 풀 때마다 <b>랜덤</b>으로 섞이고 <b>시간</b>이 측정됩니다.</p>
-      <div class="card"><h3>⭐ 추천 세트</h3>
+      <div class="card"><h3>📄 실전 모의고사 (10회)</h3>
+        <p class="muted" style="margin:0 0 10px">회차를 고르면 실제 시험처럼 출제됩니다. 풀 때마다 문항·보기가 랜덤으로 섞입니다.</p>
+        <div id="mockRounds" class="roundgrid"></div>
+      </div>
+      <div class="card"><h3>⭐ 추천 세트 (분야 묶음)</h3>
         <p class="muted" style="margin:0 0 10px">공기업·공무원 고졸채용에서 중시하는 영역으로 묶었습니다.</p>
         <div id="mockReco" class="recogrid"></div>
       </div>

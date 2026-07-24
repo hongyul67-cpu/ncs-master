@@ -310,7 +310,11 @@ function gradeCbt(){
   });
   var dur=Math.round((Date.now()-s.t0)/1000), score=Math.round(correct/s.list.length*100);
   s.result={correct:correct,total:s.list.length,score:score,wrong:wrong,durationSec:dur};
-  if(s.rec){ if(s.rec.kind==='cbt') recordCbt(s.rec.area,s.rec.level,score); else if(s.rec.kind==='mock') recordMock(score); }
+  if(s.rec){
+    if(s.rec.kind==='cbt') recordCbt(s.rec.area,s.rec.level,score);
+    else if(s.rec.kind==='mock') recordMock(score);
+    else if(s.rec.kind==='mockRound'){ if(!PROG.mockRounds)PROG.mockRounds={}; PROG.mockRounds[s.rec.idx]=Math.max(PROG.mockRounds[s.rec.idx]||0,score); saveProg(); }
+  }
   document.getElementById(s.dom.run).classList.add('hidden');
   document.getElementById(s.dom.result).classList.remove('hidden');
   document.getElementById(s.dom.score).textContent=score;
@@ -374,6 +378,7 @@ function renderMockConfig(){
   document.getElementById('mockReco').innerHTML=RECO_SETS.map(function(r,i){
     return '<button class="recobtn" onclick="applyReco('+i+')"><b>⭐ '+esc(r.name)+'</b><span>'+esc(r.desc)+'</span></button>';
   }).join('');
+  renderMockRounds();
   // 분야 체크박스
   document.getElementById('mockAreas').innerHTML=Object.keys(AREAS).filter(function(k){return AREAS[k].ready;}).map(function(k){
     var a=AREAS[k], on=mockSel[k]?' on':'';
@@ -392,11 +397,43 @@ function mockPool(areaKeys, mode){
   areaKeys.forEach(function(k){
     var a=AREAS[k]; if(!a) return;
     a.cbt.hard.forEach(function(q){ pool.push(Object.assign({},q,{_src:a.name})); });
-    if(mode==='real' && a.games.combo){
-      a.games.combo.basic.concat(a.games.combo.hard).forEach(function(q){ pool.push(Object.assign({},q,{_src:a.name+' 복합'})); });
+    if(mode==='real'){
+      if(a.games.combo) a.games.combo.basic.concat(a.games.combo.hard).forEach(function(q){ pool.push(Object.assign({},q,{_src:a.name+' 복합'})); });
+      if(a.games.real5) a.games.real5.basic.concat(a.games.real5.hard).forEach(function(q){ pool.push(Object.assign({},q,{_src:a.name+' 실전'})); });
     }
   });
   return pool;
+}
+
+/* 실전 모의고사 10회 (회차별 프리셋) */
+var ALL10=['comm','math','problem','self','resource','relation','info','tech','org','ethic'];
+var ESS4=['comm','math','problem','resource'];
+var MOCK_ROUNDS=[
+  {name:'1회 · 필수과목', areas:ESS4, count:20},
+  {name:'2회 · 필수과목', areas:ESS4, count:20},
+  {name:'3회 · 필수과목', areas:ESS4, count:20},
+  {name:'4회 · 필수과목', areas:ESS4, count:25},
+  {name:'5회 · 필수과목', areas:ESS4, count:25},
+  {name:'6회 · 사무직형', areas:['comm','math','problem','resource','org','info'], count:25},
+  {name:'7회 · 기술직형', areas:['comm','math','problem','resource','tech','info'], count:25},
+  {name:'8회 · 전략과목', areas:['self','relation','info','tech','org','ethic'], count:20},
+  {name:'9회 · 전영역 종합', areas:ALL10, count:30},
+  {name:'10회 · 전영역 종합', areas:ALL10, count:30}
+];
+function startMockRound(i){
+  var r=MOCK_ROUNDS[i]; if(!r) return;
+  var pool=mockPool(r.areas, 'real');
+  if(!pool.length){ alert('출제할 문항이 없습니다.'); return; }
+  var list=makeSet(pool).slice(0, Math.min(r.count, pool.length));
+  startExam(list, MOCK_DOM, 'mq', '실전 모의고사 '+r.name.split(' ')[0]);
+  cbtState.rec={kind:'mockRound', idx:i};
+}
+function renderMockRounds(){
+  var box=document.getElementById('mockRounds'); if(!box) return;
+  box.innerHTML=MOCK_ROUNDS.map(function(r,i){
+    var best=(PROG.mockRounds&&PROG.mockRounds[i]!=null)?'<span style="color:var(--green);font-weight:800"> ✓'+PROG.mockRounds[i]+'점</span>':'';
+    return '<button class="roundbtn" onclick="startMockRound('+i+')"><b>'+esc(r.name)+'</b><span>'+r.count+'문항'+best+'</span></button>';
+  }).join('');
 }
 function updateMockInfo(){
   var keys=Object.keys(mockSel);
