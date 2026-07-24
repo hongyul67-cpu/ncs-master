@@ -160,16 +160,23 @@ function renderGameTiles(){
     var gm=g[k], n=gm[STATE.level].length;
     var best=(ap.games||{})[k];
     var badge=(best!=null)?'<span style="color:var(--green);font-weight:800"> · ✓ 최고 '+best+'점</span>':'';
+    var go = n>0 ? (n+'문항 · '+lvTxt()+badge+' →')
+                 : ('<span style="color:var(--dim)">🔒 '+(STATE.level==='basic'?'심화':'기초')+' 난이도 전용</span>');
     return '<button class="tile" onclick="startGame(\''+k+'\')">'+
       '<div class="ico">'+gm.ic+'</div><div class="t">'+esc(gm.name)+'</div>'+
       '<div class="d">'+esc(gm.desc)+'</div>'+
-      '<div class="go">'+n+'문항 · '+lvTxt()+badge+' →</div></button>';
+      '<div class="go">'+go+'</div></button>';
   }).join('');
 }
 var gState=null;
 function startGame(key){
   var gm=A().games[key];
-  gState={key:key, list:makeSet(gm[STATE.level]), i:0, correct:0, name:gm.name};
+  var bank=gm[STATE.level];
+  if(!bank || !bank.length){
+    alert('"'+gm.name+'" 은(는) '+(STATE.level==='basic'?'심화':'기초')+' 난이도에 문항이 있습니다.\n오른쪽 위에서 난이도를 바꿔 주세요.');
+    return;
+  }
+  gState={key:key, list:makeSet(bank), i:0, correct:0, name:gm.name};
   FX.reset();
   document.getElementById('playHome').classList.add('hidden');
   document.getElementById('playRun').classList.remove('hidden');
