@@ -349,10 +349,10 @@ function resetCbt(){
 
 /* ── 모의고사 (분야 선택 · 추천 세트) ── */
 var RECO_SETS=[
-  {name:'공기업 필기 핵심 3종', areas:['comm','math','problem'], desc:'거의 모든 기관 공통 — 의사소통·수리·문제해결'},
+  {name:'필수과목 4종 (최우선)', areas:['comm','math','problem','resource'], desc:'대부분의 기업이 출제 — 의사소통·수리·문제해결·자원관리'},
+  {name:'전략과목 6종', areas:['self','relation','info','tech','org','ethic'], desc:'기업에 따라 출제 — 자기개발·대인관계·정보·기술·조직이해·직업윤리'},
   {name:'사무직 종합', areas:['comm','math','problem','resource','org','info'], desc:'사무 직군 대비'},
-  {name:'기술직 종합', areas:['comm','math','problem','tech','info'], desc:'기술 직군 대비'},
-  {name:'인성·상황판단 대비', areas:['relation','org','ethic','self'], desc:'인성검사·상황형 대비'},
+  {name:'기술직 종합', areas:['comm','math','problem','resource','tech','info'], desc:'기술 직군 대비'},
   {name:'전 영역 모의고사', areas:['comm','math','problem','self','resource','relation','info','tech','org','ethic'], desc:'NCS 10개 영역 전체'}
 ];
 var mockSel={};
