@@ -65,7 +65,7 @@ function resetProgress(){
   try{ localStorage.removeItem(PROG_KEY); }catch(e){}
   setLevel('basic');
   if(STATE.area){ renderGameTiles(); }
-  renderAreaCards(); renderHubExtras();
+  renderAreaCards(); renderHubExtras(); renderReco();
   alert('학습 기록을 초기화했습니다.');
 }
 
@@ -358,13 +358,68 @@ function resetCbt(){
   document.getElementById(dom.home).classList.remove('hidden');
 }
 
+/* ── 권장 학습 (추천 묶음 전용 화면) ── */
+function areaTouched(k){
+  var ap=PROG.areas[k];
+  return !!(ap && (Object.keys(ap.games||{}).length + Object.keys(ap.cbt||{}).length) > 0);
+}
+function goReco(){
+  STATE.area=null;
+  document.getElementById('abar').classList.remove('on');
+  document.getElementById('nav').classList.remove('on');
+  showView('reco');
+  renderReco();
+}
+function renderReco(){
+  var box=document.getElementById('recoList'); if(!box) return;
+  box.innerHTML=RECO_SETS.map(function(r,i){
+    var areas=r.areas.filter(function(k){ return AREAS[k] && AREAS[k].ready; });
+    var done=areas.filter(areaTouched).length;
+    var chips=areas.map(function(k){
+      var a=AREAS[k], t=areaTouched(k);
+      return '<button class="rchip'+(t?' done':'')+'" onclick="selectArea(\''+k+'\')">'+
+        a.ic+' '+esc(a.name.replace('능력',''))+(t?' ✓':'')+'</button>';
+    }).join('');
+    var pool=mockPool(areas,'real').length;
+    var pri=r.pri?'<span class="pri">'+esc(r.pri)+'</span>':'';
+    return '<div class="rcard'+(i===0?' top':'')+'"><div class="rbar"></div>'+
+      '<div class="rtitle">'+(r.ic||'⭐')+' '+esc(r.name)+pri+'</div>'+
+      '<div class="rdesc">'+esc(r.desc)+'</div>'+
+      '<div class="rchips">'+chips+'</div>'+
+      '<div class="rmeta">학습한 영역 <b>'+done+' / '+areas.length+'</b> · 출제 가능 <b>'+pool+'문항</b></div>'+
+      '<div class="rbtns">'+
+        '<button class="btn primary" onclick="startRecoMock('+i+')">🎯 이 묶음으로 모의고사 (20문항)</button>'+
+        '<button class="btn ghost" onclick="applyRecoToMock('+i+')">⚙️ 문항 수 조절해서 시작</button>'+
+      '</div></div>';
+  }).join('');
+}
+function startRecoMock(i){
+  var r=RECO_SETS[i]; if(!r) return;
+  var areas=r.areas.filter(function(k){ return AREAS[k] && AREAS[k].ready; });
+  var pool=mockPool(areas,'real');
+  if(!pool.length){ alert('출제할 문항이 없습니다.'); return; }
+  showView('mock');
+  document.getElementById('mockResult').classList.add('hidden');
+  var list=makeSet(pool).slice(0, Math.min(20, pool.length));
+  startExam(list, MOCK_DOM, 'mq', r.name);
+  cbtState.rec={kind:'mock'};
+}
+function applyRecoToMock(i){
+  applyReco(i);
+  goMock();
+  setTimeout(function(){
+    var el=document.getElementById('mockAreas');
+    if(el) el.scrollIntoView({behavior:'smooth',block:'center'});
+  },120);
+}
+
 /* ── 모의고사 (분야 선택 · 추천 세트) ── */
 var RECO_SETS=[
-  {name:'필수과목 4종 (최우선)', areas:['comm','math','problem','resource'], desc:'대부분의 기업이 출제 — 의사소통·수리·문제해결·자원관리'},
-  {name:'전략과목 6종', areas:['self','relation','info','tech','org','ethic'], desc:'기업에 따라 출제 — 자기개발·대인관계·정보·기술·조직이해·직업윤리'},
-  {name:'사무직 종합', areas:['comm','math','problem','resource','org','info'], desc:'사무 직군 대비'},
-  {name:'기술직 종합', areas:['comm','math','problem','resource','tech','info'], desc:'기술 직군 대비'},
-  {name:'전 영역 모의고사', areas:['comm','math','problem','self','resource','relation','info','tech','org','ethic'], desc:'NCS 10개 영역 전체'}
+  {ic:'🔥', pri:'최우선', name:'필수과목 4종', areas:['comm','math','problem','resource'], desc:'대부분의 기업이 출제 — 의사소통·수리·문제해결·자원관리'},
+  {ic:'🎯', name:'전략과목 6종', areas:['self','relation','info','tech','org','ethic'], desc:'기업에 따라 출제 — 자기개발·대인관계·정보·기술·조직이해·직업윤리'},
+  {ic:'🏢', name:'사무직 종합', areas:['comm','math','problem','resource','org','info'], desc:'사무 직군 대비 — 필수 4종에 조직이해·정보를 더한 묶음'},
+  {ic:'🔧', name:'기술직 종합', areas:['comm','math','problem','resource','tech','info'], desc:'기술 직군 대비 — 필수 4종에 기술·정보를 더한 묶음'},
+  {ic:'📚', name:'전 영역 종합', areas:['comm','math','problem','self','resource','relation','info','tech','org','ethic'], desc:'NCS 10개 영역 전체 — 마무리 점검용'}
 ];
 var mockSel={};
 function goMock(){
@@ -383,7 +438,7 @@ function resetMockConfig(){
 function renderMockConfig(){
   // 추천 세트
   document.getElementById('mockReco').innerHTML=RECO_SETS.map(function(r,i){
-    return '<button class="recobtn" onclick="applyReco('+i+')"><b>⭐ '+esc(r.name)+'</b><span>'+esc(r.desc)+'</span></button>';
+    return '<button class="recobtn" onclick="applyReco('+i+')"><b>'+(r.ic||'⭐')+' '+esc(r.name)+'</b><span>'+esc(r.desc)+'</span></button>';
   }).join('');
   renderMockRounds();
   // 분야 체크박스
