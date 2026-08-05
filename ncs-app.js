@@ -20,8 +20,9 @@ function shuffle(arr){
   return a;
 }
 function shuffleQ(q){
-  // 보기 순서를 섞고 정답 인덱스를 다시 매핑. "위 모두 옳다"류 집계형 보기만 고정.
-  var lock = q.opts.some(function(o){ return /모두 (옳|맞|정답|해당)|위 모두|위의? 모두/.test(o); });
+  // 보기 순서를 섞고 정답 인덱스를 다시 매핑.
+  // 고정: ①"위 모두 옳다"류 집계형 ②q.fix(금액·번호·요일처럼 순서가 의미를 갖는 보기)
+  var lock = q.fix || q.opts.some(function(o){ return /모두 (옳|맞|정답|해당)|위 모두|위의? 모두/.test(o); });
   if(lock) return Object.assign({}, q);
   var idx = q.opts.map(function(_,i){return i;});
   idx = shuffle(idx);
