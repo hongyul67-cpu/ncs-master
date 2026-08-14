@@ -17,8 +17,56 @@ var fs = require('fs');
 var path = require('path');
 
 var args = process.argv.slice(2);
-var files = args.filter(function (a) { return /\.js$/i.test(a) && fs.existsSync(a); });
-var only = args.filter(function (a) { return files.indexOf(a) < 0; })[0] || null;
+
+/* 인자 해석
+   - 파일 / 디렉터리 / 와일드카드(*)를 받아 .js 목록으로 넓힌다.
+     Windows 셸은 *를 넓혀 주지 않으므로 여기서 직접 처리한다.
+   - 그 밖의 낱말은 영역 필터로 본다.
+   - 경로처럼 보이는데 하나도 못 찾으면 조용히 넘어가지 않고 즉시 중단한다.
+     (아무것도 검사하지 않고 "문제 없음"을 출력하는 것이 가장 위험하다) */
+var SKIP_DIR = /^(node_modules|\.git|dist|build|\.next|coverage)$/i;
+function listJs(dir) {
+  var out = [];
+  fs.readdirSync(dir, { withFileTypes: true }).forEach(function (e) {
+    if (e.isDirectory() && SKIP_DIR.test(e.name)) return;   // 라이브러리 폴더는 건너뛴다
+    var p = path.join(dir, e.name);
+    if (e.isDirectory()) out = out.concat(listJs(p));
+    else if (/\.js$/i.test(e.name)) out.push(p);
+  });
+  return out;
+}
+function expand(a) {
+  var norm = a.replace(/\\/g, '/');
+  if (/[*?]/.test(norm)) {
+    var dir = path.dirname(norm), pat = path.basename(norm);
+    if (!fs.existsSync(dir)) return [];
+    var rx = new RegExp('^' + pat.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*').replace(/\?/g, '.') + '$', 'i');
+    return fs.readdirSync(dir).filter(function (f) { return rx.test(f); })
+             .map(function (f) { return path.join(dir, f); })
+             .filter(function (f) { return fs.statSync(f).isFile(); });
+  }
+  if (fs.existsSync(norm)) return fs.statSync(norm).isDirectory() ? listJs(norm) : [norm];
+  return [];
+}
+function looksLikePath(a) { return /[\\/]|[*?]|\.js$/i.test(a); }
+
+var files = [], only = null, badArgs = [];
+args.forEach(function (a) {
+  if (looksLikePath(a)) {
+    var got = expand(a);
+    if (!got.length) badArgs.push(a);
+    else files = files.concat(got);
+  } else if (!only) only = a;
+});
+if (badArgs.length) {
+  console.error('★ 다음 인자에서 .js 파일을 찾지 못했습니다:');
+  badArgs.forEach(function (a) { console.error('   ' + a); });
+  console.error('\n  · 경로에 공백이 있으면 따옴표로 감싸세요.');
+  console.error('  · 폴더 경로를 그대로 넘겨도 됩니다(하위 폴더까지 훑습니다).');
+  console.error('  · Windows 경로의 역슬래시(\\)는 그대로 두어도 됩니다.');
+  process.exit(2);
+}
+files = files.filter(function (f, i) { return files.indexOf(f) === i; });
 
 global.window = {};
 
@@ -137,6 +185,12 @@ if (files.length) {
   });
 } else {
   eval(fs.readFileSync(__dirname + '/ncs-data.js', 'utf8'));
+  if (only && !AREAS[only]) {
+    console.error('★ "' + only + '" 은(는) 영역 키가 아닙니다.');
+    console.error('  사용 가능한 영역: ' + Object.keys(AREAS).join(', '));
+    console.error('  파일을 검사하려면 파일이나 폴더 경로를 넘기세요.');
+    process.exit(2);
+  }
 }
 
 var issues = [];   // {sev, area, loc, msg}
@@ -246,7 +300,7 @@ function walkAreas(A) {
 // 그룹별 문항 수(파일 기반 검사에서 보고용)
 var groupCount = {};
 
-if (FLAT.length) {
+if (files.length) {          // 파일을 넘겼으면 문항이 0건이더라도 파일 모드로 처리한다
   var idxOf = {};
   FLAT.forEach(function (item) {
     if (item.__areas) { walkAreas(item.__areas); return; }
@@ -277,7 +331,11 @@ var order = { '치명': 0, '중간': 1, '경미': 2 };
 issues.sort(function (x, y) { return order[x.sev] - order[y.sev]; });
 
 console.log('══════ 문항 통계 ══════');
-if (files.length) console.log('검사 파일      ' + files.map(function (f) { return path.basename(f); }).join(', '));
+if (files.length) {
+  var names = files.map(function (f) { return path.basename(f); });
+  console.log('검사 파일      ' + files.length + '개' +
+    (names.length <= 12 ? ': ' + names.join(', ') : ': ' + names.slice(0, 12).join(', ') + ' … 외 ' + (names.length - 12) + '개'));
+}
 console.log('총 문항        ' + stat.total);
 console.log('보기 4지 / 5지 ' + stat.opt4 + ' / ' + stat.opt5 + (stat.other ? ' / 기타 ' + stat.other : ''));
 console.log('지문(cond) 있음 ' + stat.withCond + '   표(table) 있음 ' + stat.withTable + '   보기고정(fix) ' + stat.fixed);
@@ -295,6 +353,15 @@ if (gk.length) {
 }
 
 console.log('\n══════ 검사 결과 ══════');
+if (stat.total === 0) {
+  // 검사 대상이 0건인데 "문제 없음"을 내보내면 통과한 것으로 오해하게 된다.
+  console.error('★ 검사한 문항이 0건입니다. 아무것도 확인되지 않았습니다.');
+  console.error('  파일은 읽혔지만 문항을 찾지 못했을 수 있습니다. 다음을 확인하세요:');
+  console.error('   · 문항 객체에 q(또는 question)와 opts(또는 options/choices)가 있는지');
+  console.error('   · addQ 계열 함수 이름이 addQ/addQuestion/addItem/add 중 하나인지');
+  console.error('   · 파일이 문항 데이터가 맞는지(엔진·설정 파일을 넘기지 않았는지)');
+  process.exit(2);
+}
 if (!issues.length) {
   console.log('문제 없음 ✓');
 } else {
