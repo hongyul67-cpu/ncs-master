@@ -1,13 +1,143 @@
 /* ═══════════════════════════════════════════════════════════
    check-data.js — 문항 데이터 무결성 검사기
-   사용법:  node check-data.js            (전체 검사)
-            node check-data.js math       (특정 영역만)
+
+   사용법
+     node check-data.js                     기본: 같은 폴더 ncs-data.js 전체 검사
+     node check-data.js math                특정 영역만
+     node check-data.js 파일1.js 파일2.js    임의의 문항 파일들을 검사(형식 자동 인식)
+     node check-data.js "전사폴더/*.js"      (셸이 넓혀 주는 경우)
+
+   자동 인식하는 형식
+     ① var AREAS = {...}                    이 저장소의 표준 구조
+     ② addQ(...) / addQuestion(...) 호출 나열  전사 작업물에서 흔한 형태
+     ③ 문항 객체 배열을 담은 전역변수/ module.exports
+   → 전사 결과를 AREAS 형태로 손수 바꿀 필요가 없다.
    ═══════════════════════════════════════════════════════════ */
 var fs = require('fs');
-var only = process.argv[2] || null;
+var path = require('path');
+
+var args = process.argv.slice(2);
+var files = args.filter(function (a) { return /\.js$/i.test(a) && fs.existsSync(a); });
+var only = args.filter(function (a) { return files.indexOf(a) < 0; })[0] || null;
 
 global.window = {};
-eval(fs.readFileSync(__dirname + '/ncs-data.js', 'utf8'));
+
+/* ── 임의 파일에서 문항을 끌어내는 로더 ────────────────────── */
+function looksLikeQ(o) {
+  return o && typeof o === 'object' && !Array.isArray(o) &&
+    typeof (o.q !== undefined ? o.q : o.question) === 'string' &&
+    Array.isArray(o.opts || o.options || o.choices);
+}
+function normalizeQ(o) {
+  // 필드명이 다른 전사물도 받아들인다
+  var n = {};
+  n.q = o.q !== undefined ? o.q : o.question;
+  n.opts = o.opts || o.options || o.choices;
+  n.answer = o.answer !== undefined ? o.answer : o.ans;
+  n.why = o.why !== undefined ? o.why : (o.explain !== undefined ? o.explain : o.해설);
+  if (o.cond !== undefined) n.cond = o.cond;
+  if (o.table !== undefined) n.table = o.table;
+  if (o.fix !== undefined) n.fix = o.fix;
+  return n;
+}
+
+function loadFile(file) {
+  var collected = [];   // {group, q}
+  var src = fs.readFileSync(file, 'utf8');
+
+  // addQ 계열 호출을 가로채는 shim. 인자 어디에 문항 객체가 있어도 잡아낸다.
+  function shim(name) {
+    return function () {
+      var ctx = [], objs = [];
+      for (var i = 0; i < arguments.length; i++) {
+        var a = arguments[i];
+        if (typeof a === 'string') ctx.push(a);
+        else if (Array.isArray(a)) a.forEach(function (x) { if (looksLikeQ(x)) objs.push(x); });
+        else if (looksLikeQ(a)) objs.push(a);
+      }
+      var group = ctx.length ? ctx.join('.') : name;
+      objs.forEach(function (o) { collected.push({ group: group, q: normalizeQ(o) }); });
+    };
+  }
+  ['addQ', 'addQuestion', 'addItem', 'add'].forEach(function (n) { global[n] = shim(n); });
+
+  var scope = {};
+  delete global.AREAS;             // 이전 파일의 잔재가 섞이지 않도록
+  var before = Object.keys(global);
+
+  // ① 먼저 전역 스코프에서 실행한다.
+  //    간접 eval이라 `var AREAS = {...}` 같은 선언이 globalThis에 붙어 밖에서도 보인다.
+  var ranGlobal = false;
+  try { (0, eval)(src); ranGlobal = true; }
+  catch (e) {
+    // module.exports / require 를 쓰는 파일은 CommonJS 래퍼로 재시도
+    try {
+      var m = { exports: {} };
+      (new Function('module', 'exports', 'require', 'window', 'addQ', 'addQuestion', 'addItem', 'add', src))
+        (m, m.exports, require, global.window, global.addQ, global.addQuestion, global.addItem, global.add);
+      scope.exported = m.exports;
+    } catch (e2) {
+      console.error('★ ' + file + ' 을(를) 읽지 못했습니다: ' + e2.message);
+      return { areas: null, flat: [] };
+    }
+  }
+
+  // ② AREAS 구조가 잡혔으면 그대로 사용
+  var areasObj = global.AREAS || (scope.exported && scope.exported.AREAS) || null;
+  if (areasObj && !collected.length) return { areas: areasObj, flat: [] };
+
+  // 전역에 새로 생긴 값들도 탐색 대상에 넣는다
+  if (ranGlobal) {
+    scope.globals = {};
+    Object.keys(global).forEach(function (k) {
+      if (before.indexOf(k) < 0) scope.globals[k] = global[k];
+    });
+  }
+
+  // ② addQ로 모인 것이 있으면 그것을 사용
+  if (collected.length) return { areas: null, flat: collected };
+
+  // ③ 전역/exports에 남은 문항 배열을 찾는다
+  var pools = [];
+  function scan(obj, prefix, depth) {
+    if (!obj || depth > 3) return;
+    Object.keys(obj).forEach(function (k) {
+      var v = obj[k];
+      if (Array.isArray(v) && v.length && v.every(looksLikeQ)) pools.push({ group: prefix + k, list: v });
+      else if (v && typeof v === 'object' && !Array.isArray(v)) scan(v, prefix + k + '.', depth + 1);
+    });
+  }
+  if (scope.exported && typeof scope.exported === 'object') scan(scope.exported, '', 0);
+  if (Array.isArray(scope.exported) && scope.exported.every(looksLikeQ))
+    pools.push({ group: 'exports', list: scope.exported });
+  if (scope.globals) scan(scope.globals, '', 0);
+  pools.forEach(function (p) {
+    p.list.forEach(function (o) { collected.push({ group: p.group, q: normalizeQ(o) }); });
+  });
+  return { areas: null, flat: collected };
+}
+
+/* ── 입력 결정 ─────────────────────────────────────────────── */
+var FLAT = [];              // 파일 기반 검사용
+var SRCLABEL = {};          // 그룹 → 출처 파일
+if (files.length) {
+  files.forEach(function (f) {
+    var r = loadFile(f);
+    var base = path.basename(f);
+    if (r.areas) {
+      // AREAS 파일이면 표준 경로로 검사하도록 전역에 실어 준다
+      global.AREAS = r.areas;
+      FLAT.push({ __areas: r.areas, __file: base });
+    } else {
+      r.flat.forEach(function (item) {
+        FLAT.push({ group: base + ' :: ' + item.group, q: item.q });
+        SRCLABEL[base] = (SRCLABEL[base] || 0) + 1;
+      });
+    }
+  });
+} else {
+  eval(fs.readFileSync(__dirname + '/ncs-data.js', 'utf8'));
+}
 
 var issues = [];   // {sev, area, loc, msg}
 var seenQ = {};    // 중복 문두 탐지
@@ -88,28 +218,48 @@ function tally(ak, q) {
   answerHist[ak] = answerHist[ak] || {};
   answerHist[ak][q.answer] = (answerHist[ak][q.answer] || 0) + 1;
 }
-Object.keys(AREAS).forEach(function (ak) {
-  if (only && ak !== only) return;
-  var a = AREAS[ak];
-  if (!a.games || !a.games.order) return bad('치명', ak, '-', 'games.order 없음');
+function walkAreas(A) {
+  Object.keys(A).forEach(function (ak) {
+    if (only && ak !== only) return;
+    var a = A[ak];
+    if (!a.games || !a.games.order) return bad('치명', ak, '-', 'games.order 없음');
 
-  a.games.order.forEach(function (gk) {
-    var gm = a.games[gk];
-    if (!gm) return bad('치명', ak, 'games.' + gk, 'order에 있으나 정의되지 않음');
+    a.games.order.forEach(function (gk) {
+      var gm = a.games[gk];
+      if (!gm) return bad('치명', ak, 'games.' + gk, 'order에 있으나 정의되지 않음');
+      ['basic', 'hard'].forEach(function (lv) {
+        (gm[lv] || []).forEach(function (q, i) {
+          checkQ(ak, 'games.' + gk + '.' + lv + '[' + i + ']', q);
+          tally(ak, q);
+        });
+      });
+    });
     ['basic', 'hard'].forEach(function (lv) {
-      (gm[lv] || []).forEach(function (q, i) {
-        checkQ(ak, 'games.' + gk + '.' + lv + '[' + i + ']', q);
+      ((a.cbt || {})[lv] || []).forEach(function (q, i) {
+        checkQ(ak, 'cbt.' + lv + '[' + i + ']', q);
         tally(ak, q);
       });
     });
   });
-  ['basic', 'hard'].forEach(function (lv) {
-    (a.cbt[lv] || []).forEach(function (q, i) {
-      checkQ(ak, 'cbt.' + lv + '[' + i + ']', q);
-      tally(ak, q);
-    });
+}
+
+// 그룹별 문항 수(파일 기반 검사에서 보고용)
+var groupCount = {};
+
+if (FLAT.length) {
+  var idxOf = {};
+  FLAT.forEach(function (item) {
+    if (item.__areas) { walkAreas(item.__areas); return; }
+    var g = item.group;
+    idxOf[g] = (idxOf[g] || 0);
+    groupCount[g] = (groupCount[g] || 0) + 1;
+    checkQ(g, '[' + idxOf[g] + ']', item.q);
+    tally(g, item.q);
+    idxOf[g]++;
   });
-});
+} else {
+  walkAreas(AREAS);
+}
 
 // ── 정답 편향 ──
 Object.keys(answerHist).forEach(function (ak) {
@@ -127,6 +277,7 @@ var order = { '치명': 0, '중간': 1, '경미': 2 };
 issues.sort(function (x, y) { return order[x.sev] - order[y.sev]; });
 
 console.log('══════ 문항 통계 ══════');
+if (files.length) console.log('검사 파일      ' + files.map(function (f) { return path.basename(f); }).join(', '));
 console.log('총 문항        ' + stat.total);
 console.log('보기 4지 / 5지 ' + stat.opt4 + ' / ' + stat.opt5 + (stat.other ? ' / 기타 ' + stat.other : ''));
 console.log('지문(cond) 있음 ' + stat.withCond + '   표(table) 있음 ' + stat.withTable + '   보기고정(fix) ' + stat.fixed);
@@ -135,6 +286,12 @@ if (wl.length) {
   wl.sort(function (a, b) { return a - b; });
   var avg = Math.round(wl.reduce(function (a, b) { return a + b; }, 0) / wl.length);
   console.log('해설 길이       평균 ' + avg + '자 / 최단 ' + wl[0] + '자 / 중앙 ' + wl[Math.floor(wl.length / 2)] + '자');
+}
+
+var gk = Object.keys(groupCount);
+if (gk.length) {
+  console.log('\n══════ 그룹별 문항 수 ══════');
+  gk.sort().forEach(function (g) { console.log('  ' + g + '  —  ' + groupCount[g] + '문항'); });
 }
 
 console.log('\n══════ 검사 결과 ══════');
