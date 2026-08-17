@@ -418,6 +418,72 @@
 <script src="https://hongyul67-cpu.github.io/links/fx.js"></script>
 <script src="https://hongyul67-cpu.github.io/links/collector.js"
         data-tool="NCS 직업기초능력" data-classes="1,2,3,4,5,6,7,8,9,10" data-max-num="40"></script>
+<script src="https://hongyul67-cpu.github.io/links/rank.js" data-tool="NCS 직업기초능력"></script>
+<script>
+/* ── NCS 직업기초능력 — 랭킹전 + 생기부 키워드 ──
+   · 랭킹: 같은 data-tool 을 쓰는 도구끼리 RP(랭크 포인트)가 하나로 쌓인다.
+   · 생기부: 제출할 때 활동명·도전횟수·계급이 자동으로 얹혀 키워드·문장 초안이 만들어진다. */
+(function(){
+  var MODE_NAME = 'NCS 직업기초능력';
+  var TRY_KEY   = 'try_ncs';
+
+  function bumpTry(m){
+    var d={}; try{ d=JSON.parse(localStorage.getItem(TRY_KEY))||{}; }catch(e){}
+    d[m]=(d[m]||0)+1;
+    try{ localStorage.setItem(TRY_KEY, JSON.stringify(d)); }catch(e){}
+    return d[m];
+  }
+  /* 도구마다 화면 구조가 달라, 계급은 화면 구석 배지로 공통 표시한다 */
+  function paintBadge(){
+    if(!window.Rank || !document.body) return;
+    var el=document.getElementById('rk-badge');
+    if(!el){
+      el=document.createElement('div'); el.id='rk-badge';
+      el.style.cssText='position:fixed;right:10px;bottom:10px;z-index:9998;'
+        +'font-size:11.5px;opacity:.9;pointer-events:none';
+      document.body.appendChild(el);
+    }
+    try{ el.innerHTML=Rank.badge(); }catch(e){}
+  }
+
+  window.RankKit = {
+    mode: MODE_NAME,
+    /* 채점이 끝난 지점에서 호출 — RP 정산 + 승급 연출 */
+    award: function(pct, mode){
+      if(mode) window.RankKit.lastMode = mode;
+      if(!window.Rank) return null;
+      var rk=null;
+      try{ rk=Rank.award(pct, {mode: mode||MODE_NAME}); }catch(e){}
+      paintBadge();
+      if(rk && rk.tierUp && window.FX){
+        try{ FX.banner({icon:rk.tierAfter.icon, title:rk.tierAfter.name+' 승급!',
+                        sub:rk.after+' RP · '+rk.tierAfter.full, stars:3}); }catch(e){}
+      }
+      return rk;
+    }
+  };
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', paintBadge);
+  else paintBadge();
+
+
+  /* 생기부 — 제출 payload 에 활동명·도전횟수·계급을 자동으로 붙인다 */
+  var t=setInterval(function(){
+    if(!window.ResultCollector) return;
+    clearInterval(t);
+    if(ResultCollector.__kit) return;
+    ResultCollector.__kit=1;
+    var orig=ResultCollector.open;
+    ResultCollector.open=function(p){
+      p=p||{};
+      var m=p.mode||window.RankKit.lastMode||MODE_NAME;
+      p.mode=m;
+      if(p.retry===undefined) p.retry=bumpTry(m);
+      if(p.tier===undefined && window.Rank){ try{ p.tier=Rank.get().tier.full; }catch(e){} }
+      return orig.call(this,p);
+    };
+  }, 60);
+})();
+</script>
 <script src="ncs-data.js"></script>
 <script src="ncs-app.js"></script>
 </body>

@@ -226,6 +226,8 @@ function nextG(){
   var perQ=(dur/s.list.length).toFixed(1);
   var miss=s.list.length-s.correct, stars=FX.starsFor(miss);
   if(STATE.area) recordGame(STATE.area, s.key, Math.round(s.correct/s.list.length*100));
+  if(window.RankKit) RankKit.award(Math.round(s.correct/s.list.length*100),
+    'NCS 직업기초능력 — '+s.name);   /* 랭킹전 RP 정산 */
   FX.banner({
     icon: stars===3?'🏆':(stars===2?'🎉':(stars>=1?'👍':'💪')),
     title: s.name+' 완료!',
@@ -330,6 +332,7 @@ function gradeCbt(){
   document.getElementById(s.dom.time).textContent=dur;
   document.getElementById(s.dom.wrong).innerHTML=wrong.length
     ? '틀린 문제: '+wrong.map(function(n){return 'Q'+n;}).join(', ') : '🎉 전부 맞혔어요!';
+  if(window.RankKit) RankKit.award(score, 'NCS 직업기초능력 — '+(s.label||'실전 점검'));   /* 랭킹전 RP 정산 */
   FX.banner({
     icon: score>=90?'🏆':(score>=70?'🎉':'💪'),
     title:(s.label||'점검')+' · '+score+'점',
