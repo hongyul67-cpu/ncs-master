@@ -176,7 +176,9 @@ function startGame(key){
     alert('"'+gm.name+'" 은(는) '+(STATE.level==='basic'?'심화':'기초')+' 난이도에 문항이 있습니다.\n오른쪽 위에서 난이도를 바꿔 주세요.');
     return;
   }
-  gState={key:key, list:makeSet(bank), i:0, correct:0, name:gm.name};
+  var gn=document.getElementById('gameNote'); if(gn) gn.innerHTML='';   // 직전 게임 결과 지움
+  gState={key:key, list:makeSet(bank), i:0, correct:0, name:gm.name, wrong:[],
+          mode:A().name+' — '+gm.name+' 게임('+lvTxt()+')'};
   FX.reset();
   document.getElementById('playHome').classList.add('hidden');
   document.getElementById('playRun').classList.remove('hidden');
@@ -210,6 +212,8 @@ function answerG(idx){
     btns[idx].classList.add('no'); btns[q.answer].classList.add('ok'); FX.no(btns[idx]);
     fb.className='fb bad show';
     fb.innerHTML='<b>아쉬워요.</b> 정답은 '+String.fromCharCode(9312+q.answer)+'. '+esc(q.why);
+    s.wrong.push({no:s.i+1, src:'', q:q.q, cond:q.cond||'',
+                  pick:q.opts[idx], ans:q.opts[q.answer], why:q.why||''});
   }
   var next=document.createElement('button');
   next.className='btn primary';
@@ -226,8 +230,7 @@ function nextG(){
   var perQ=(dur/s.list.length).toFixed(1);
   var miss=s.list.length-s.correct, stars=FX.starsFor(miss);
   if(STATE.area) recordGame(STATE.area, s.key, Math.round(s.correct/s.list.length*100));
-  if(window.RankKit) RankKit.award(Math.round(s.correct/s.list.length*100),
-    'NCS 직업기초능력 — '+s.name);   /* 랭킹전 RP 정산 */
+  if(window.RankKit) RankKit.award(Math.round(s.correct/s.list.length*100), s.mode);   /* 랭킹전 RP 정산 */
   FX.banner({
     icon: stars===3?'🏆':(stars===2?'🎉':(stars>=1?'👍':'💪')),
     title: s.name+' 완료!',
@@ -235,13 +238,24 @@ function nextG(){
     stars: stars, btn:'게임 목록으로',
     onClose:function(){
       quitGame();
-      if(window.ResultCollector && ResultCollector.config.endpoint){
-        setTimeout(function(){
-          ResultCollector.open({correct:s.correct,total:s.list.length,score:FX.score(),durationSec:dur,labels:{correct:'정답'}});
-        },300);
-      }
+      showGameResult(s, dur);
     }
   });
+}
+/* 게임이 끝나면 게임 목록 위에 결과 요약 + 오답노트 + 제출 버튼을 남긴다.
+   (전에는 제출 모달이 저절로 떴고, ?rc= 링크가 아니면 아예 보이지도 않았다) */
+function showGameResult(s, dur){
+  var box=document.getElementById('gameNote'); if(!box) return;
+  var pct=Math.round(s.correct/s.list.length*100);
+  box.innerHTML='<div class="card"><h3>🎮 '+esc(s.name)+' 결과 · '+pct+'점</h3>'+
+    '<p class="muted" style="margin:0">'+s.list.length+'문제 중 <b>'+s.correct+'개</b> 정답 · ⏱ '+fmtTime(dur)+'</p>'+
+    '<div id="gameNoteBody"></div><div id="gameAnchor"></div></div>';
+  renderWrongNote('gameNoteBody', s.wrong, s.list.length);
+  var payload={mode:s.mode, score:pct, correct:s.correct, total:s.list.length,
+               wrong:wrongDescs(s.wrong), durationSec:dur};
+  mountSubmit('gameAnchor','rcGame', s.name, function(){ return payload; },
+              [A()? A().name+' 문제 해결' : 'NCS 문제 해결']);
+  box.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 function quitGame(){
   stopClock();
@@ -252,13 +266,59 @@ function quitGame(){
 
 /* ── 실전 점검 / 모의고사 공용 시험 엔진 ── */
 var cbtState=null;
-var CBT_DOM={run:'cbtRun',result:'cbtResult',home:'cbtHome',list:'cbtList',bar:'cbtBar',timer:'cbtTimer',score:'cbtScore',correct:'cbtCorrect',total:'cbtTotal',time:'cbtTime',wrong:'cbtWrong'};
-var MOCK_DOM={run:'mockRun',result:'mockResult',home:'mockHome',list:'mockList',bar:'mockBar',timer:'mockTimer',score:'mockScore',correct:'mockCorrect',total:'mockTotal',time:'mockTime',wrong:'mockWrong'};
+var CBT_DOM={run:'cbtRun',result:'cbtResult',home:'cbtHome',list:'cbtList',bar:'cbtBar',timer:'cbtTimer',score:'cbtScore',correct:'cbtCorrect',total:'cbtTotal',time:'cbtTime',wrong:'cbtWrong',note:'cbtNote',anchor:'cbtAnchor',btn:'rcCbt'};
+var MOCK_DOM={run:'mockRun',result:'mockResult',home:'mockHome',list:'mockList',bar:'mockBar',timer:'mockTimer',score:'mockScore',correct:'mockCorrect',total:'mockTotal',time:'mockTime',wrong:'mockWrong',note:'mockNote',anchor:'mockAnchor',btn:'rcMock'};
+
+/* ══════════ 결과 제출 (파트별) ══════════
+   규약(links/CONVENTIONS.md §1):
+   · mode는 파트마다 다르게 — 시트 "활동(파트)" 열에 그대로 들어간다
+   · wrong은 번호가 아니라 무엇을 틀렸는지
+   · 제출 버튼은 ?rc= 링크가 아니어도 항상 보인다 (attach가 처리) */
+var RC_BASE='NCS 직업기초능력';
+function shortTxt(t,len){
+  t=String(t==null?'':t).replace(/\s+/g,' ').trim();
+  return t.length>len ? t.slice(0,len-1)+'…' : t;
+}
+/* "3번 수리능력 · 12%→15%" 처럼 무엇을 틀렸는지 남긴다 */
+function wrongDescs(items){
+  return items.map(function(w){
+    return w.no+'번 '+(w.src?w.src+' · ':'')+shortTxt(w.pick,16)+'→'+shortTxt(w.ans,16);
+  });
+}
+/* 시험이 끝난 뒤에만 부른다 — 번호·영역·지문·내가 고른 답·정답·해설 */
+function renderWrongNote(boxId, items, total){
+  var box=document.getElementById(boxId); if(!box) return;
+  if(!items.length){
+    box.innerHTML='<div class="wnote"><div class="wn-all">🎯 '+total+'문항 전부 맞혔어요! 오답이 없습니다.</div></div>';
+    return;
+  }
+  box.innerHTML='<div class="wnote"><h3>📕 오답노트 — 틀린 '+items.length+'문항</h3>'+
+    items.map(function(w){
+      return '<div class="wnq">'+
+        '<div class="wn-no">'+w.no+'번'+(w.src?' · '+esc(w.src):'')+'</div>'+
+        '<div class="wn-q">'+esc(w.q)+'</div>'+
+        (w.cond?'<div class="wn-cond">'+esc(w.cond)+'</div>':'')+
+        '<div class="wn-line bad">✗ 내가 고른 답 &nbsp;<b>'+esc(w.pick)+'</b></div>'+
+        '<div class="wn-line good">✓ 정답 &nbsp;<b>'+esc(w.ans)+'</b></div>'+
+        (w.why?'<div class="wn-why">'+esc(w.why)+'</div>':'')+
+      '</div>';
+    }).join('')+'</div>';
+}
+/* 오답노트 아래(앵커 뒤)에 제출 버튼을 붙인다 */
+function mountSubmit(anchorId, btnId, label, getPayload, extra){
+  var anchor=document.getElementById(anchorId);
+  if(!anchor || !window.ResultCollector || !ResultCollector.attach) return null;
+  var b=ResultCollector.attach(anchor, getPayload,
+    {id:btnId, className:'btn primary', mode:getPayload().mode, extra:extra});
+  if(b){ b.style.width='100%'; b.textContent='📤 ['+label+'] 결과 제출'; }
+  return b;
+}
 
 function starsByScore(score){ return score>=90?3:(score>=75?2:(score>=60?1:0)); }
 
-function startExam(list, dom, qp, label){
-  cbtState={list:list, picks:new Array(list.length).fill(-1), t0:0, dom:dom, qp:qp, label:label};
+function startExam(list, dom, qp, label, mode){
+  cbtState={list:list, picks:new Array(list.length).fill(-1), t0:0, dom:dom, qp:qp,
+            label:label, mode:mode||(RC_BASE+' — '+label)};
   document.getElementById(dom.home).classList.add('hidden');
   document.getElementById(dom.result).classList.add('hidden');
   document.getElementById(dom.run).classList.remove('hidden');
@@ -267,7 +327,13 @@ function startExam(list, dom, qp, label){
   cbtState.t0=startClock(dom.timer);
   window.scrollTo({top:0,behavior:'smooth'});
 }
-function startCbt(){ startExam(makeSet(A().cbt[STATE.level]), CBT_DOM, 'cq', A().name+' 점검'); cbtState.rec={kind:'cbt', area:STATE.area, level:STATE.level}; }
+function startCbt(){
+  var a=A();
+  startExam(makeSet(a.cbt[STATE.level]), CBT_DOM, 'cq', a.name+' 점검',
+            a.name+' — 실전 점검('+lvTxt()+')');
+  cbtState.rec={kind:'cbt', area:STATE.area, level:STATE.level};
+  cbtState.srcName=a.name;
+}
 function renderExam(){
   var s=cbtState, qp=s.qp;
   document.getElementById(s.dom.list).innerHTML=s.list.map(function(q,qi){
@@ -304,7 +370,7 @@ function gradeCbt(){
     return;
   }
   stopClock();
-  var correct=0, wrong=[];
+  var correct=0, wrong=[], note=[];
   s.list.forEach(function(q,qi){
     var pick=s.picks[qi];
     document.querySelectorAll('#'+s.qp+qi+' .cbto label').forEach(function(l){
@@ -315,10 +381,17 @@ function gradeCbt(){
     });
     var sol=document.getElementById('sol_'+s.qp+qi); sol.className='sol show';
     if(pick===q.answer){ correct++; sol.innerHTML='<b>정답 ✔</b> '+esc(q.why); }
-    else{ wrong.push(qi+1); sol.innerHTML='<b>정답: '+String.fromCharCode(9312+q.answer)+'</b> '+esc(q.why); }
+    else{
+      wrong.push(qi+1);
+      note.push({no:qi+1, src:q._src||s.srcName||'', q:q.q, cond:q.cond||'',
+                 pick:q.opts[pick], ans:q.opts[q.answer], why:q.why||''});
+      sol.innerHTML='<b>정답: '+String.fromCharCode(9312+q.answer)+'</b> '+esc(q.why);
+    }
   });
   var dur=Math.round((Date.now()-s.t0)/1000), score=Math.round(correct/s.list.length*100);
-  s.result={correct:correct,total:s.list.length,score:score,wrong:wrong,durationSec:dur};
+  s.note=note;
+  s.result={mode:s.mode, correct:correct, total:s.list.length, score:score,
+            wrong:wrongDescs(note), durationSec:dur};
   if(s.rec){
     if(s.rec.kind==='cbt') recordCbt(s.rec.area,s.rec.level,score);
     else if(s.rec.kind==='mock') recordMock(score);
@@ -332,7 +405,11 @@ function gradeCbt(){
   document.getElementById(s.dom.time).textContent=dur;
   document.getElementById(s.dom.wrong).innerHTML=wrong.length
     ? '틀린 문제: '+wrong.map(function(n){return 'Q'+n;}).join(', ') : '🎉 전부 맞혔어요!';
-  if(window.RankKit) RankKit.award(score, 'NCS 직업기초능력 — '+(s.label||'실전 점검'));   /* 랭킹전 RP 정산 */
+  if(window.RankKit) RankKit.award(score, s.mode);   /* 랭킹전 RP 정산 (다른 세션 작업 유지) */
+  /* 오답노트 → 그 아래 제출 버튼 (규약 §2) */
+  renderWrongNote(s.dom.note, note, s.list.length);
+  mountSubmit(s.dom.anchor, s.dom.btn, s.label, function(){ return cbtState.result; },
+              [(s.rec&&s.rec.kind==='cbt')?'실전 점검 문항 해결':'실전 모의고사 응시']);
   FX.banner({
     icon: score>=90?'🏆':(score>=70?'🎉':'💪'),
     title:(s.label||'점검')+' · '+score+'점',
@@ -340,12 +417,6 @@ function gradeCbt(){
     stars:starsByScore(score), btn:'결과 확인'
   });
   window.scrollTo({top:0,behavior:'smooth'});
-}
-function submitExam(){
-  if(!cbtState||!cbtState.result) return;
-  var r=cbtState.result;
-  if(window.ResultCollector){ ResultCollector.open({correct:r.correct,total:r.total,score:r.score,wrong:r.wrong,durationSec:r.durationSec}); }
-  else{ alert('결과 제출 기능은 선생님이 배포한 링크에서 활성화됩니다.'); }
 }
 function reviewCbt(){
   document.getElementById(cbtState.dom.result).classList.add('hidden');
@@ -435,7 +506,8 @@ function startMockRound(i){
   var pool=mockPool(r.areas, 'real');
   if(!pool.length){ alert('출제할 문항이 없습니다.'); return; }
   var list=makeSet(pool).slice(0, Math.min(r.count, pool.length));
-  startExam(list, MOCK_DOM, 'mq', '실전 모의고사 '+r.name.split(' ')[0]);
+  startExam(list, MOCK_DOM, 'mq', '실전 모의고사 '+r.name.split(' ')[0],
+            RC_BASE+' — 실전 모의고사 '+r.name.replace(' · ',' '));
   cbtState.rec={kind:'mockRound', idx:i};
 }
 function renderMockRounds(){
@@ -460,7 +532,9 @@ function startMock(){
   var pool=mockPool(keys,mode);
   if(!pool.length){ alert('선택한 영역에 출제할 문항이 없습니다.'); return; }
   var list=makeSet(pool).slice(0, Math.min(count,pool.length));
-  startExam(list, MOCK_DOM, 'mq', '모의고사');
+  var names=keys.map(function(k){return AREAS[k].name.replace('능력','');}).join('·');
+  startExam(list, MOCK_DOM, 'mq', '모의고사',
+            RC_BASE+' — 모의고사('+shortTxt(names,24)+')');
   cbtState.rec={kind:'mock'};
 }
 
