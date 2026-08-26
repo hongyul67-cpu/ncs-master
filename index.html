@@ -478,6 +478,26 @@ body.bd-open .cm-launch{visibility:hidden!important;pointer-events:none!importan
     return d[m];
   }
   /* 도구마다 화면 구조가 달라, 계급은 화면 구석 배지로 공통 표시한다 */
+  /* 오른쪽 아래 구석에는 「🎓 수업모드」(class-mode.js) · 「🔇 소리」(fx.js) 도 붙는다.
+     계급 배지는 z-index 가 낮아 그 밑에 깔려 안 보이므로, 붙어 있는 것들을 재서
+     제일 위로 올린다. backbar.js 가 왼쪽 아래에서 쓰는 방식과 같다.
+     두 단추가 fx.js 처럼 늦게 붙는 경우가 있어 load 뒤에 한 번 더 잰다. */
+  function stackBadge(el){
+    function place(){
+      var up=10;
+      ['.cm-launch','#fxSnd'].forEach(function(s){
+        var o=document.querySelector(s); if(!o) return;
+        var r=o.getBoundingClientRect();
+        if(r.height) up=Math.max(up, Math.round(window.innerHeight-r.top)+6);
+      });
+      el.style.bottom=up+'px';
+    }
+    place();
+    setTimeout(place,0);
+    window.addEventListener('load',place);
+    window.addEventListener('resize',place);   /* 폰 회전·창 크기 바뀜 */
+  }
+
   function paintBadge(){
     if(!window.Rank || !document.body) return;
     var el=document.getElementById('rk-badge');
@@ -486,6 +506,7 @@ body.bd-open .cm-launch{visibility:hidden!important;pointer-events:none!importan
       el.style.cssText='position:fixed;right:10px;bottom:10px;z-index:9998;'
         +'font-size:11.5px;opacity:.9;pointer-events:none';
       document.body.appendChild(el);
+      stackBadge(el);
     }
     try{ el.innerHTML=Rank.badge(); }catch(e){}
   }
