@@ -445,6 +445,19 @@
 .wn-all{border:1px dashed var(--line,#cbd5e1);border-radius:14px;padding:18px;text-align:center;
   font-weight:800;font-size:15px}
 </style>
+<style>
+/* ── 오른쪽 아래에 떠 있는 버튼 두 개가 서로 포개지는 것을 막는다 ──
+   fx.js 의 「소리」(#fxSnd, bottom:12px) 와 class-mode.js 의 「수업모드」(.cm-launch, bottom:14px)
+   가 둘 다 오른쪽 아래에 붙는데, 서로의 존재를 모른다. 두 파일 다 공용이라 여기서 비켜 준다.
+   (수업모드 버튼 높이 44 + bottom 14 = 58 → 그 위 8px 인 66px 로 올린다) */
+#fxSnd{bottom:66px!important}
+
+/* 수업 슬라이드가 열려 있는 동안에는 이 둘도 숨긴다.
+   board.js 가 숨기는 목록(뒤로가기·기록초기화·계급배지)에 이 둘은 안 들어 있어서,
+   폰 폭에서 슬라이드 아래쪽 [다음 ▶] 위로 올라와 겹친다. */
+body.bd-open #fxSnd,
+body.bd-open .cm-launch{visibility:hidden!important;pointer-events:none!important}
+</style>
 <script src="https://hongyul67-cpu.github.io/links/fx.js"></script>
 <script src="https://hongyul67-cpu.github.io/links/collector.js"
         data-tool="NCS 직업기초능력" data-classes="1,2,3,4,5,6,7,8,9,10" data-max-num="40"></script>

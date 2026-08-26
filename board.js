@@ -101,10 +101,16 @@
     'body.bd-open{overflow:hidden}',
     /* 슬라이드가 열려 있는 동안에는 본체의 떠 있는 위젯을 숨긴다.
        레이어가 z-index 로 덮고 있긴 하지만, 나중에 더 높은 z 를 쓰는 위젯이
-       생기면 바로 겹치므로 아예 가려 둔다. 수업 화면도 깔끔해진다. */
+       생기면 바로 겹치므로 아예 가려 둔다. 수업 화면도 깔끔해진다.
+
+       ⚠ display:none 이 아니라 visibility:hidden 을 쓴다.
+         backbar.js 는 「기록 초기화」(.tr-btn) 의 높이를 재서 그 위에 자기를 올린다.
+         display:none 으로 지우면 높이가 0 이 되어 backbar 가 맨 아래(bottom:10px)로
+         내려앉고, 슬라이드를 닫아도 그대로 남아 두 버튼이 82% 겹쳐 버린다.
+         visibility:hidden 은 안 보이고 눌리지도 않으면서 자리는 지키므로 이 문제가 없다. */
     'body.bd-open #bb-btn,',        /* 뒤로/목록으로 (backbar.js) */
     'body.bd-open .tr-btn,',        /* 기록 초기화 (reset.js) */
-    'body.bd-open #rk-badge{display:none!important}'   /* 계급 배지 (rank.js) */
+    'body.bd-open #rk-badge{visibility:hidden!important;pointer-events:none!important}'   /* 계급 배지 (rank.js) */
   ].join('\n');
 
   var DECK = [], UNIT = [];
@@ -300,9 +306,27 @@
     elIn.innerHTML = h;
     elBody.scrollTop = 0;
     elPrev.disabled = (S.i === 0 && S.step === 0);
-    elNext.textContent = S.step < 3
-      ? ['발문 열기 ▶', '퀴즈 열기 ▶', '정답 열기 ▶'][S.step]
-      : (S.i === S.list.length - 1 ? '수업 마치기' : '다음 슬라이드 ▶');
+    elNext.textContent = nextLabel(s);
+  }
+
+  function tailLabel() {
+    return S.i === S.list.length - 1 ? '수업 마치기' : '다음 슬라이드 ▶';
+  }
+
+  /* [다음] 을 누르면 '실제로' 무엇이 열리는지 미리 따져서 그대로 적는다.
+     발문·퀴즈·해설이 없는 슬라이드도 있으므로(요점과 발문만 있는 원고 등),
+     없는 것을 열겠다고 써 두면 안 된다 — 아래 next() 와 같은 순서로 따진다. */
+  function nextLabel(s) {
+    if (S.step >= 3) return tailLabel();
+    var st = S.step + 1;
+    if (st === 1 && !s.ask) st++;
+    if (st === 2 && !s.ansq) st = 3;
+    if (st === 1) return '발문 열기 ▶';
+    if (st === 2) return '퀴즈 열기 ▶';
+    if (!s.anse && !s.ansq && !s.go) return tailLabel();  /* 열 것이 없어 바로 다음 장으로 간다 */
+    if (s.ansq) return '정답 열기 ▶';
+    if (s.anse) return '해설 열기 ▶';
+    return '문제풀이 열기 ▶';
   }
 
   /* 다음 — 요점→발문→퀴즈→정답 순으로 열고, 다 열렸으면 다음 장으로 */
