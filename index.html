@@ -286,6 +286,7 @@
     </div>
     <div id="resumeBar"></div>
     <button class="btn primary" style="margin-top:10px" onclick="goMock()">🎯 모의고사 · 실전 종합 (분야를 골라 시험처럼)</button>
+    <button class="btn ghost" style="margin-top:10px" onclick="goBoard()">🖥️ 수업 슬라이드 (선생님용) · 전자칠판으로 앞에서 끌고 가는 화면</button>
     <h2 class="sec"><span class="n">영역 선택</span> 무엇을 공부할까요?</h2>
     <div class="areas" id="areaCards"></div>
     <div class="card">
@@ -415,6 +416,14 @@
     </div>
   </section>
 
+  <!-- ══════════ 수업 슬라이드 (예전 board.html) ══════════ -->
+  <section id="board" class="view">
+    <button class="btn ghost" style="padding:8px 12px;font-size:12.5px" onclick="goHub()">← 홈</button>
+    <p class="lead">전자칠판·프로젝터로 앞에서 끌고 가는 화면입니다.
+       <b>요점 → 발문 → 퀴즈 → 정답</b>을 하나씩 열며 진행하세요. (<kbd>←</kbd> <kbd>→</kbd> 키 또는 화면 아래 버튼)</p>
+    <div id="boardHome"></div>
+  </section>
+
   <p class="note">NCS 직업기초능력 · 학습용 자체 제작 문항 (스캔 기출은 추후 추가 예정)</p>
 </div>
 
@@ -507,6 +516,8 @@
 })();
 </script>
 <script src="ncs-data.js"></script>
+<script src="lesson.js"></script>
+<script src="board.js"></script>
 <script src="ncs-app.js"></script>
 <script src="https://hongyul67-cpu.github.io/links/backbar.js"></script>
 </body>

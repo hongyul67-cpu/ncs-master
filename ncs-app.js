@@ -112,6 +112,25 @@ function go(v){
   document.querySelectorAll('#nav button').forEach(function(b){b.classList.toggle('on',b.dataset.v===v)});
 }
 
+/* ── 수업 슬라이드 — 예전 board.html 이 이 안으로 들어왔다 ──
+   원고는 lesson.js, 화면은 board.js(모든 도구 공용)가 담당한다.
+   단원 목록은 한 번만 그리면 되므로 boardReady 로 막는다. */
+var boardReady=false;
+function goBoard(){
+  STATE.area=null;
+  document.getElementById('abar').classList.remove('on');
+  document.getElementById('nav').classList.remove('on');
+  showView('board');
+  openBoardHome();
+}
+function openBoardHome(){
+  if(boardReady) return;
+  var el=document.getElementById('boardHome');
+  if(!window.Board){ el.innerHTML='<p class="muted">수업자료를 불러오지 못했습니다.</p>'; return; }
+  Board.home(el,{hint:'10개 영역을 4단원으로 묶었습니다. 공기업 고졸채용 필기에서 <b>반복해서 나오는 뼈대</b>만 담았습니다.<br>슬라이드 끝의 버튼을 누르면 그 영역 학습으로 넘어갑니다(<code>?rc=…</code> 유지).'});
+  boardReady=true;
+}
+
 /* ── 허브: 영역 카드 ── */
 function renderAreaCards(){
   var box=document.getElementById('areaCards');
