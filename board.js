@@ -304,7 +304,16 @@
     }
 
     elIn.innerHTML = h;
-    elBody.scrollTop = 0;
+    /* 요점이 여러 줄이라 퀴즈·정답을 열면 새로 열린 칸이 화면 아래로 밀린다.
+       그때마다 맨 위로 되돌리면 선생님이 매번 손으로 내려야 한다 —
+       장이 바뀔 때만 위로 올리고, 단계를 열 때는 새로 열린 칸을 화면에 들여 놓는다. */
+    if (S.step === 0) {
+      elBody.scrollTop = 0;
+    } else {
+      var fresh = elIn.querySelector('.bd-go') || elIn.querySelector('.bd-exp') ||
+                  elIn.querySelector('.bd-quiz') || elIn.querySelector('.bd-ask');
+      if (fresh) fresh.scrollIntoView({ block: 'end' }); else elBody.scrollTop = 0;
+    }
     elPrev.disabled = (S.i === 0 && S.step === 0);
     elNext.textContent = nextLabel(s);
   }
