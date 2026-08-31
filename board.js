@@ -110,6 +110,8 @@
          visibility:hidden 은 안 보이고 눌리지도 않으면서 자리는 지키므로 이 문제가 없다. */
     'body.bd-open #bb-btn,',        /* 뒤로/목록으로 (backbar.js) */
     'body.bd-open .tr-btn,',        /* 기록 초기화 (reset.js) */
+    'body.bd-open #rb-btn,',        /* 평가 기준 (collector.js) — ◀ 이전 단추 왼쪽을 덮어 못 누르게 하던 것 */
+    'body.bd-open .fx-snd,',        /* 소리 켜기 (fx.js) — 다음 슬라이드 단추 밑에 깔려 쓸모가 없다 */
     'body.bd-open #rk-badge{visibility:hidden!important;pointer-events:none!important}'   /* 계급 배지 (rank.js) */
   ].join('\n');
 
